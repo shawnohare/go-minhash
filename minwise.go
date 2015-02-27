@@ -46,3 +46,22 @@ func (m *MinWise) Sketch(xs Set) Signature {
 	
 	return mins
 }
+
+
+
+
+func (m *MinWise) Similarity(sig1, sig2 Signature) float64 {
+	if len(sig1) != len(sig2) {
+		panic("signature size mismatch")
+	}
+
+	intersect := 0 // counter for number of elements in intersection
+	
+	for i  := range sig1 {
+		if sig1[i] = sig2[i] {
+			intersect ++
+		}
+	}
+
+	return float64(intersect) / float64(len(sig1))
+}
