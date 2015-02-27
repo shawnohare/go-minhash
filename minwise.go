@@ -47,10 +47,14 @@ func (m *MinWise) Sketch(xs Set) Signature {
 	return mins
 }
 
-
-
-
 func (m *MinWise) Similarity(sig1, sig2 Signature) float64 {
+	return MinWiseSimilarity(sig1, sig2)
+}
+
+
+// MinWiseSimilarity computes an estimate for the
+// Jaccard similarity of two sets given their MinWise signatures.
+func MinWiseSimilarity(sig1, sig2 Signature) float64 {
 	if len(sig1) != len(sig2) {
 		panic("signature size mismatch")
 	}
