@@ -2,6 +2,7 @@ package mhsig
 
 import (
 	"math"
+	"sync"
 )
 
 // MinWise is a data structure for generating a parametric family of
@@ -10,20 +11,38 @@ import (
 type MinWise struct {
 	// size is the signature length the instance will compute
 	size int
-	h1 Hash64Func
-	h2 Hash64Func
+	h1 HashFunc
+	h2 HashFunc
 }
 
-// defaultSignature will return an appropriately typed array 
-func defaultSignature(size int) Signature {
-	s := make(Signature, size)
-	for i := range s {
-		s[i] = infinity
+func (m *MinWise) Sketch(xs Set) Signature {
+	mins := defaultSignature(m.size)
+
+	// map m.h1 and m.h2 over input set xs.
+	// These are temporarily stored so that h1 and h2 do not
+	// have to be repeatedly computed for each x in xs.
+	h1s := make(Signature, len(xs))
+	h2s := make(Signature, len(xs))
+	for i, x := range xs {
+		h1s[i] = m.h1(x)
+		h2s[i] = m.h2(x)
 	}
-	return s
-}
-
-func (m MinWise) Sketch(Set) Signature {
-	// initialize an array of infinities
-	mins := make([], m.size)
+	// Determine minim values for the hash functions in parallel. 
+	var wg sync.WaitGroup()
+	wg.Add(m.size)
+	for i, m := range mins {
+		go func(i int) {
+			defer wg.Done()
+			for j := range xs {
+				// Compute ith hash function on jth data point
+				hx := h1s[j] + SignatureElement(i) * h2s[j]
+				if hx < m {
+					mins[i] = hx
+				}
+			}
+		}
+	}
+	wg.Wait()
+	
+	return mins
 }

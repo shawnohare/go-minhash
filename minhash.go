@@ -65,9 +65,10 @@ const (
 	infinity uint64 = math.MaxUint64
 )
 
-type Hash64Func func([]byte) uint64
+type HashFunc func([]byte) uint64
 
-// Signature is an integer array representing the signature of a set.
+// Signature is an array representing the signature of a set.
+// Its elements should be of the same type as the codomain of a HashFunc.
 type Signature []uint64
 type futureSignature chan Signature
 
@@ -85,8 +86,25 @@ type MinHash interface {
 	Similarity(Signature) float64
 }
 
+// defaultSignature will return an appropriately typed array
+func defaultSignature(size int) Signature {
+	s := make(Signature, size)
+	for i := range s {
+		s[i] = infinity
+	}
+	return s
+}
+
 // EstimateIntersection estimates the cardinality of the intersection
 // between two sets provided their sizes and Jaccard similarity are known.
+//
+// If n, m, i, u denote |A|, |B|, |A & B|, and |A || B| respectively,
+// then given that A and B are not disjoint (i != 0), w have
+// J := J(A, B) = i / u which is equivalent to
+// 1/J = u / i = (n + m - i) / i = (n + m / i) - 1.
+// Solving for i yields |A & B| = (n + m) / ((1/J)+ 1).
+// Thus an estimate for the Jaccard index of A and B yields an estimate
+// for the size of their intersection, provided we know the sizes of A and B.
 func EstimateIntersection(js float64, size1, size2 int) int {
 	var est int
 	if js == 0 {
@@ -96,11 +114,3 @@ func EstimateIntersection(js float64, size1, size2 int) int {
 	}
 	return est
 }
-
-// If n, m, i, u denote |A|, |B|, |A & B|, and |A || B| respectively,
-// then given that A and B are not disjoint (i != 0), w have
-// J := J(A, B) = i / u which is equivalent to
-// 1/J = u / i = (n + m - i) / i = (n + m / i) - 1.
-// Solving for i yields |A & B| = (n + m) / ((1/J)+ 1).
-// Thus an estimate for the Jaccard index of A and B yields an estimate
-// for the size of their intersection, provided we know the sizes of A and B.
