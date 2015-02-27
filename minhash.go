@@ -60,16 +60,18 @@ import (
 )
 
 const (
-	infinity float64 = math.Inf(1)
+	MaxUint  uint   = ^uint(0)
+	MaxInt   int    = int(MaxUint >> 1)
+	infinity uint64 = math.MaxUint64
 )
 
-type HashFunc func([]byte) int
+type Hash64Func func([]byte) uint64
 
 // Signature is an integer array representing the signature of a set.
-type Signature []int
+type Signature []uint64
 type futureSignature chan Signature
 
-// Set is a representation of a generic set after some bit encoding.
+// Set is a representation of a set after some bit encoding.
 type Set [][]byte
 
 // MinHash is an a data structure that computes and compares signatures.
