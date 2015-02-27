@@ -86,7 +86,7 @@ type MinHash interface {
 	Similarity(Signature) float64
 }
 
-// defaultSignature will return an appropriately typed array
+// defaultSignature will return an appropriately typed array of infinities
 func defaultSignature(size int) Signature {
 	s := make(Signature, size)
 	for i := range s {
