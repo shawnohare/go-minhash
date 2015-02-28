@@ -1,10 +1,10 @@
 /*
-Package mhsig provides functions for computing and comparing MinHash
-signatures for bulk (as opposed to streaming) data.  For
-probabilistic data structures that process streaming data
-confer https:// github.com/dgrisky/go-minhash and
-https://github.com/tylertreat/BoomFilters. The former package inspires
-many of the implementation details of the present one.
+Package minhash provides probabilistic data structures for computing
+MinHash signatures for streaming data.  Additionally, it provides some
+helper functions that ingest signatures.
+
+The reader should also conf https:// github.com/dgrisky/go-minhash and
+https://github.com/tylertreat/BoomFilters.
 
 MinHash signatures can be used to estimate the Jaccard index
 J(A, B) := |A & B| / |A || B| of two sets that are subsets
@@ -53,7 +53,7 @@ such as CityHash, Spooky, Murmur3, or SipHash.
 
 */
 
-package mhsig
+package minhash
 
 import (
 	"math"
@@ -68,25 +68,33 @@ const (
 type HashFunc func([]byte) uint64
 
 // Signature is an array representing the signature of a set.
-// Its elements should be of the same type as the codomain of a HashFunc.
 type Signature []uint64
-type futureSignature chan Signature
 
-// Set is a representation of a set after some bit encoding.
-type Set [][]byte
-
-// MinHash is an a data structure that computes and compares signatures.
+// MinHash is an a probabilistic data structure used to
+// compute a similarity preserving signature for a set.  It ingests
+// a stream of the set's elements and continuously updates the signature.
 type MinHash interface {
-	// Sketch computes a signature for a set.
-	Sketch(Set) Signature
+	// Push ingests a set element, hashes it, and updates the signature.
+	Push([]byte)
+
+	// Merge updates the signature of the instance with the signature
+	// of the input.  This results in the signature of the union of the
+	// two sets, which is stored in the original MinHash instance.
+	Merge(*MinHash)
+
+	// Cardinality estimates the size of the set from the signature.
+	Cardinality() int
+
+	// Signature returns the signature itself.
+	Signature() []uint64
 
 	// Similarity computes the similarity between two MinHash signatures.
 	// The method for computing similarity depends on whether a MinWise
 	// or Bottom-K implementation is used.
-	Similarity(Signature) float64
+	Similarity(*MinHash) float64
 }
 
-// defaultSignature will return an appropriately typed array of infinities
+// defaultSignature will return an appropriately typed array
 func defaultSignature(size int) Signature {
 	s := make(Signature, size)
 	for i := range s {
@@ -95,7 +103,24 @@ func defaultSignature(size int) Signature {
 	return s
 }
 
-// EstimateIntersection estimates the cardinality of the intersection
+// toBytes converts various types to a byte slice
+// so they can be pushed into a MinHash instance.
+func toBytes(x interface{}) []byte {
+	b := make([]byte, 8)
+	switch t := x.(type) {
+	case []byte:
+		b = t
+	case string:
+		b = []byte(t)
+	case uint, uint16, uint32, uint64:
+		binary.LittleEndian.PutUint64(b, uint64(t))
+	case int, int16, int32, int64:
+		binary.LittleEndian.PutUint64(b, uint64(int64(t)))
+	}
+	return b
+}
+
+// Intersection estimates the cardinality of the intersection
 // between two sets provided their sizes and Jaccard similarity are known.
 //
 // If n, m, i, u denote |A|, |B|, |A & B|, and |A || B| respectively,
@@ -105,12 +130,12 @@ func defaultSignature(size int) Signature {
 // Solving for i yields |A & B| = (n + m) / ((1/J)+ 1).
 // Thus an estimate for the Jaccard index of A and B yields an estimate
 // for the size of their intersection, provided we know the sizes of A and B.
-func EstimateIntersection(js float64, size1, size2 int) int {
+func Intersection(js float64, size1, size2 int) int {
 	var est int
 	if js == 0 {
 		est = 0
 	} else {
-		est = math.Floor((size1 + size2) / ((1.0 / js) + 1))
+		est = int(math.Floor(float64(size1+size2) / ((1.0 / js) + 1)))
 	}
 	return est
 }

@@ -1,56 +1,77 @@
-package mhsig
+package minhash
 
 import (
+	"encoding/binary"
 	"math"
 	"sync"
 )
 
 // MinWise is a data structure for generating a parametric family of
 // hash functions of the form h1 + i*h2 for i=1, ..., k to compute
-// a MinHash signatures.
+// a MinHash signature.  Each instance is tied to a single
+// streamed set and hence single signature.  As it ingests
+// elements it will update the current signature.
+
+// The ith element of the signature is the current minimal value
+// of the ith hash function.
 type MinWise struct {
-	// size is the signature length the instance will compute
-	size int
-	h1 HashFunc
-	h2 HashFunc
+	minimums Signature
+	h1       HashFunc
+	h2       HashFunc
 }
 
-func (m *MinWise) Sketch(xs Set) Signature {
-	mins := defaultSignature(m.size)
-
-	// map m.h1 and m.h2 over input set xs.
-	// These are temporarily stored so that h1 and h2 do not
-	// have to be repeatedly computed for each x in xs.
-	h1s := make(Signature, len(xs))
-	h2s := make(Signature, len(xs))
-	for i, x := range xs {
-		h1s[i] = m.h1(x)
-		h2s[i] = m.h2(x)
+// NewMinWise constructs a new MinWise instance that will
+// compute a signature of the specified size.
+func NewMinWise(h1, h2 HashFunc, size int) *MinWise {
+	mw := MinWise{
+		minimums: defaultSignature(size), // running set of min values
+		h1:       h1,
+		h2:       h2,
 	}
-	// Determine minim values for the hash functions in parallel. 
-	var wg sync.WaitGroup()
-	wg.Add(m.size)
-	for i, m := range mins {
-		go func(i int) {
-			defer wg.Done()
-			for j := range xs {
-				// Compute ith hash function on jth data point
-				hx := h1s[j] + SignatureElement(i) * h2s[j]
-				if hx < m {
-					mins[i] = hx
-				}
-			}
+	return &mw
+}
+
+// Push updates the set's signature.  It hashes the input
+// with each function in the family and compares these values
+// with the current set of minimums, replacing them as necessary.
+func (m *MinWise) Push(b []byte) {
+
+	v1 := m.h1(b)
+	v2 := m.h2(b)
+
+	// Compare minimal values
+	for i, min := range m.minimums {
+		// Compute hi(b) for ith hash function hi
+		hb := v1 + uint64(i)*v2
+		if hb < min {
+			m.minimums[i] = hb
 		}
 	}
-	wg.Wait()
-	
-	return mins
 }
 
-func (m *MinWise) Similarity(sig1, sig2 Signature) float64 {
-	return MinWiseSimilarity(sig1, sig2)
+// PushGeneric deals with generic data by handling byte conversion.
+func (m *MinWise) PushGeneric(x interface{}) {
+	b := make([]byte, 8)
+	switch t := x.(type) {
+	case []byte:
+		b = t
+	case string:
+		b = []byte(t)
+	case uint, uint16, uint32, uint64:
+		binary.LittleEndian.PutUint64(b, uint64(t))
+	case int, int16, int32, int64:
+		binary.LittleEndian.PutUint64(b, uint64(int64(t)))
+	}
+	m.Push(b)
 }
 
+func (m *MinWise) Signature() Signature {
+	return m.minimums
+}
+
+func (m *MinWise) Similarity(m2 *MinWise) float64 {
+	return MinWiseSimilarity(m.Signature(), m2.Signature())
+}
 
 // MinWiseSimilarity computes an estimate for the
 // Jaccard similarity of two sets given their MinWise signatures.
@@ -60,12 +81,120 @@ func MinWiseSimilarity(sig1, sig2 Signature) float64 {
 	}
 
 	intersect := 0 // counter for number of elements in intersection
-	
-	for i  := range sig1 {
-		if sig1[i] = sig2[i] {
-			intersect ++
+
+	for i := range sig1 {
+		if sig1[i] == sig2[i] {
+			intersect++
 		}
 	}
 
 	return float64(intersect) / float64(len(sig1))
+}
+
+// Merge combines the signatures of the second set,
+// creating the signature of their union.
+func (m *MinWise) Merge(m2 *MinWise) {
+
+	for i, v := range m2.minimums {
+
+		if v < m.minimums[i] {
+			m.minimums[i] = v
+		}
+	}
+}
+
+// Cardinality estimates the cardinality of the set.
+func (m *MinWise) Cardinality() int {
+
+	// http://www.cohenwang.com/edith/Papers/tcest.pdf
+
+	sum := 0.0
+
+	for _, v := range m.minimums {
+		sum += -math.Log(float64(infinity-v) / float64(infinity))
+	}
+
+	return int(float64(len(m.minimums)-1) / sum)
+}
+
+// Similarity computes an estimate for the similarity between the two sets.
+func (m *MinWise) Similarity(m2 *MinWise) float64 {
+
+	if len(m.minimums) != len(m2.minimums) {
+		panic("minhash minimums size mismatch")
+	}
+
+	intersect := 0
+
+	for i := range m.minimums {
+		if m.minimums[i] == m2.minimums[i] {
+			intersect++
+		}
+	}
+
+	return float64(intersect) / float64(len(m.minimums))
+}
+
+// SignatureBbit returns a b-bit reduction of the signature.  This will result in unused bits at the high-end of the words if b does not divide 64 evenly.
+func (m *MinWise) SignatureBbit(b uint) []uint64 {
+
+	var sig []uint64 // full signature
+	var w uint64     // current word
+	bits := uint(64) // bits free in current word
+
+	mask := uint64(1<<b) - 1
+
+	for _, v := range m.minimums {
+		if bits >= b {
+			w <<= b
+			w |= v & mask
+			bits -= b
+		} else {
+			sig = append(sig, w)
+			w = 0
+			bits = 64
+		}
+	}
+
+	if bits != 64 {
+		sig = append(sig, w)
+	}
+
+	return sig
+}
+
+// SimilarityBbit computes an estimate for the similarity between two b-bit signatures
+func SimilarityBbit(sig1, sig2 []uint64, b uint) float64 {
+
+	if len(sig1) != len(sig2) {
+		panic("signature size mismatch")
+	}
+
+	intersect := 0
+	count := 0
+
+	mask := uint64(1<<b) - 1
+
+	for i := range sig1 {
+		w1 := sig1[i]
+		w2 := sig2[i]
+
+		bits := uint(64)
+
+		for bits >= b {
+			v1 := (w1 & mask)
+			v2 := (w2 & mask)
+
+			count++
+			if v1 == v2 {
+				intersect++
+			}
+
+			bits -= b
+			w1 >>= b
+			w2 >>= b
+		}
+	}
+
+	return float64(intersect) / float64(count)
 }
