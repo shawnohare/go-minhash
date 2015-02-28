@@ -3,6 +3,7 @@ package minhash
 import (
 	"encoding/binary"
 	"math"
+	"strconv"
 	"sync"
 )
 
@@ -49,20 +50,23 @@ func (m *MinWise) Push(b []byte) {
 	}
 }
 
-// PushGeneric deals with generic data by handling byte conversion.
-func (m *MinWise) PushGeneric(x interface{}) {
-	b := make([]byte, 8)
-	switch t := x.(type) {
-	case []byte:
-		b = t
-	case string:
-		b = []byte(t)
-	case uint, uint16, uint32, uint64:
-		binary.LittleEndian.PutUint64(b, uint64(t))
-	case int, int16, int32, int64:
-		binary.LittleEndian.PutUint64(b, uint64(int64(t)))
+// PushStringInt converts a string representation of an integer.
+func (m *MinWise) PushStringInt(s string) {
+	n, err := strconv.ParseUint(s, 0, 64)
+	// Gracefully do not push if cannot convert.
+	var b []byte
+	if err != nil {
+		log.Println("Could not convert string to uint64.")
+		b = []bytes(s)
+	} else {
+		b = toBytes(n)
 	}
 	m.Push(b)
+}
+
+// PushGeneric deals with generic data by handling byte conversion.
+func (m *MinWise) PushGeneric(x interface{}) {
+	m.Push(toBytes(x))
 }
 
 func (m *MinWise) Signature() Signature {
