@@ -56,7 +56,9 @@ such as CityHash, Spooky, Murmur3, or SipHash.
 package minhash
 
 import (
+	"encoding/binary"
 	"math"
+	"strconv"
 )
 
 const (

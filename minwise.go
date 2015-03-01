@@ -1,10 +1,7 @@
 package minhash
 
 import (
-	"encoding/binary"
 	"math"
-	"strconv"
-	"sync"
 )
 
 // MinWise is a data structure for generating a parametric family of
