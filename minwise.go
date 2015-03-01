@@ -21,8 +21,8 @@ type MinWise struct {
 	h2       HashFunc
 }
 
-// NewMinWise constructs a new MinWise instance that will
-// compute a signature of the specified size.
+// NewMinWise constructs a new MinWise instance initialized with
+// the empty set.
 func NewMinWise(h1, h2 HashFunc, size int) *MinWise {
 	mw := MinWise{
 		minimums: defaultSignature(size), // running set of min values
@@ -30,6 +30,10 @@ func NewMinWise(h1, h2 HashFunc, size int) *MinWise {
 		h2:       h2,
 	}
 	return &mw
+}
+
+func InitMinWise(h1, h2 HashFunc, size int) *MinWise {
+
 }
 
 // Push updates the set's signature.  It hashes the input
@@ -50,7 +54,7 @@ func (m *MinWise) Push(b []byte) {
 	}
 }
 
-// PushStringInt converts a string representation of an integer.
+// PushStringInt first converts a string into a uint64 before pushing.
 func (m *MinWise) PushStringInt(s string) {
 	m.Push(stringIntToByte(s))
 }
@@ -60,19 +64,23 @@ func (m *MinWise) PushGeneric(x interface{}) {
 	m.Push(toBytes(x))
 }
 
-func (m *MinWise) Signature() Signature {
+// Signature returns the current signature.
+func (m *MinWise) Signature() []uint64 {
 	return m.minimums
 }
 
+// Similarity computes the similarity of two signatures represented
+// as MinWise instances.  This estimates the Jaccard index of the
+// two underlying sets.
 func (m *MinWise) Similarity(m2 *MinWise) float64 {
 	return MinWiseSimilarity(m.Signature(), m2.Signature())
 }
 
 // MinWiseSimilarity computes an estimate for the
 // Jaccard similarity of two sets given their MinWise signatures.
-func MinWiseSimilarity(sig1, sig2 Signature) float64 {
+func MinWiseSimilarity(sig1, sig2 []uint64) float64 {
 	if len(sig1) != len(sig2) {
-		panic("signature size mismatch")
+		panic("Signature size mismatch.")
 	}
 
 	intersect := 0 // counter for number of elements in intersection
