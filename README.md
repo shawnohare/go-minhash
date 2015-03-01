@@ -1,7 +1,7 @@
 Package mhsig provides functions for computing and comparing MinHash
 signatures for bulk (as opposed to streaming) data.  For
 probabilistic data structures that process streaming data
-confer https:// github.com/dgrisky/go-minhash and
+confer https:// github.com/dgryski/go-minhash and
 https://github.com/tylertreat/BoomFilters. The former package inspires
 many of the implementation details of the present one.
 
@@ -33,3 +33,55 @@ take a family of integer-valued hash functions that are minwise
 independent, in the sense that for most sets A,
 min h(A) ! = min g(A) for two distinct hash functions in the family.
 Frequently this family is parametrically  generated.
+
+### MinWise
+
+The **MinWise** data structure computes the MinHash for a set by
+creating a parametric family of hash functions.  It is initialized
+with two hash functions and an integer size parameter.  The two hash
+functions h1 and h2 generate the family h1 + k(h2).
+
+#### Usage
+
+```go
+
+package main
+
+import (
+  "log"
+
+  "github.com/shawnohare/go-minhash"
+  "github.com/dgryski/go-spooky"
+  "github.com/dgryski/go-farm"
+)
+
+func main () {
+  // Some sets to compute the signatures of.
+  S1 : = []string{"123", "1", "2", "3", "4"}
+  S2 := []string{"34", "42", "2"}
+  words := []string{"idempotent", "condensation", "is", "good"}
+
+  // Specify two hash functions to use with a MinWise instance.
+  h1 := spooky.Hash64
+  h2 := farm.Hash64
+  size := 3
+
+  // Init a new MinWise instance to handle the words set.
+  wmw := minhash.NewMinWise(h1, h2, size)
+  
+  for _, w := range words {
+    wmw.PushGeneric(w)
+  }
+  wordsSig := wmw.Signature()
+
+  // Use the constructors to deal with the integer string sets.
+  mw1 := minhash.InitStringIntsMinWise(h1, h2, size, S1)
+  mw2 :+ minhash.InitStringIntsMinWise(h1, h2, size, S2)
+
+  // Compute the signature similarity.
+  var s float64
+  s = minhash.Similarity(mw1, mw2)
+  // or
+  // s = mw1.Similarity(mw2)
+}
+```
