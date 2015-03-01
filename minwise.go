@@ -21,6 +21,8 @@ type MinWise struct {
 	h2       HashFunc
 }
 
+// NOTE MinWise constructors.
+
 // NewMinWise constructs a new MinWise instance initialized with
 // the empty set.
 func NewMinWise(h1, h2 HashFunc, size int) *MinWise {
@@ -32,9 +34,18 @@ func NewMinWise(h1, h2 HashFunc, size int) *MinWise {
 	return &mw
 }
 
-func InitMinWise(h1, h2 HashFunc, size int) *MinWise {
-
+// InitStringIntMinWise creates a new MinWise instance and pushes a
+// set of integers (represented as strings).  The returned instance
+// contains the signature for the input set.
+func InitStringIntsMinWise(h1, h2 HashFunc, size int, xs []string) *MinWise {
+	mw := NewMinWise(h1, h2, size)
+	for _, x := range xs {
+		mw.PushStringInt(x)
+	}
+	return mw
 }
+
+// NOTE MinWise methods
 
 // Push updates the set's signature.  It hashes the input
 // with each function in the family and compares these values
