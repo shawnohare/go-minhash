@@ -98,8 +98,8 @@ type MinHash interface {
 }
 
 // Similarity invokes the specific
-func Similarity(m1, m2 *MinHash) float64 {
-	return (*m1).Similarity(m2) // dereference m1
+func Similarity(m1, m2 MinHash) float64 {
+	return m1.Similarity(&m2)
 }
 
 // defaultSignature will return an appropriately typed array
