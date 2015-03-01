@@ -64,74 +64,74 @@ Let's explore an example of ingesting a stream of data, sketching a signature,
 and computing the similarity between signatures.
 
 ```go
-
 package main
 
 import (
-  "log"
-
-  "github.com/shawnohare/go-minhash"
-  "github.com/dgryski/go-spooky"
-  "github.com/dgryski/go-farm"
+	"github.com/dgryski/go-farm"
+	"github.com/dgryski/go-spooky"
+	"github.com/shawnohare/go-minhash"
 )
 
-func main () {
-  // Some pre-existing sets to compute the signatures of.
-  S1 := []string{"123", "1", "2", "3", "4"}
-  S2 := []int{34, 42, 2, 9001}
-  words := []string{"idempotent", "condensation", "is", "good"}
+func main() {
+	// Some pre-existing sets to compute the signatures of.
+	S1 := []string{"123", "1", "2", "3", "4"}
+	S2 := []int{34, 42, 2, 9001}
+	words := []string{"idempotent", "condensation", "is", "good"}
 
-  // Specify two hash functions to use with a MinWise instance.
-  h1 := spooky.Hash64
-  h2 := farm.Hash64
-  size := 3
+	// Specify two hash functions to use with a MinWise instance.
+	h1 := spooky.Hash64
+	h2 := farm.Hash64
+	size := 3
 
-  // Init a new MinWise instance to handle the words set.
-  wmw := minhash.NewMinWise(h1, h2, size)
-  // Ingest the words set one element at a time.
-  for _, w := range words {
-    wmw.Push(w)
-  }
-  // Output the signature for the words set.
-  wordsSig := wmw.Signature()
+	// Init a new MinWise instance to handle the words set.
+	wmw := minhash.NewMinWise(h1, h2, size)
+	// Ingest the words set one element at a time.
+	for _, w := range words {
+		wmw.Push(w)
+	}
+	// Output the signature for the words set.
+	wordsSig := wmw.Signature()
 
-  // Repeat the above, but with string integer data S1 and integer data S2.
-  mw1 := minhash.NewMinWise(h1, h2, size)
-  mw2 := minhash.NewMinWise(h1, h2, size)
-  // Ingest S1.
-  for _, x := range S1 {
-    mw1.PushStringInt(x) // Note the different push function.
-  }
-  // Ingest S2.
-  for _, x := range S2 {
-    mw2.Push(x) // we use Push for both integers and word strings.
-  }
+	// Repeat the above, but with string integer data S1 and integer data S2.
+	mw1 := minhash.NewMinWise(h1, h2, size)
+	mw2 := minhash.NewMinWise(h1, h2, size)
+	// Ingest S1.
+	for _, x := range S1 {
+		mw1.PushStringInt(x) // Note the different push function.
+	}
+	// Ingest S2.
+	for _, x := range S2 {
+		mw2.Push(x) // we use Push for both integers and word strings.
+	}
 
-  // Comparing signatures.
-  var s float64
-  // Using a helper function that accepts MinHash interfaces.
-  s = minhash.Similarity(mw1, mw2)
-  // or if we wish, we can call the MinWise method directly.
-  // s = mw1.Similarity(mw2)
-  
-  // Output signatures for potential storage.  Both are of type []uint64.
-  sig1 := mw1.Signature()
-  sig2 := mw2.Signature()
-  
-  // Suppose we store the sig1 and sig2 above and retrieve them as []int.
-  // We can directly compare the similarities as follows.
-  // First, convert to []uint64
-  for i, v := range sig1 {
-    sig1[i] = uint64(v)
-    sig2[i] = uint64(sig2[i])
-  }
-  // Calculate similarities using the now  appropriately typed signatures.
-  simFromSigs := minhash.MinWiseSimilarity(sig1, sig2).
+	// Comparing signatures.
+	var s float64
+	// Using a helper function that accepts MinHash interfaces.
+	s = minhash.Similarity(*mw1, *mw2)
+	// or if we wish, we can call the MinWise method directly.
+	// s = mw1.Similarity(mw2)
 
-  // If we want to continue to stream elements into the set represented by
-  // sig1, we can convert it into a MinWise instance via
-  m := NewMinWiseFromSignature(h1, h2,  sig1)
-  // We can now stream in more elements an update the signature.
-  m.Push(13)
+	// Output signatures for potential storage.  Both are of type []uint64.
+	sig1 := mw1.Signature()
+	sig2 := mw2.Signature()
+
+	// Suppose we store the sig1 and sig2 above and retrieve them as []int.
+	// We can directly compare the similarities as follows.
+	usig1 := make([]uint64, len(sig1))
+	usig2 := make([]uint64, len(sig2))
+	// First, convert to []uint64
+	for i, v := range sig1 {
+		usig1[i] = uint64(v)
+		usig2[i] = uint64(sig2[i])
+	}
+	// Calculate similarities using the now  appropriately typed signatures.
+	simFromSigs := minhash.MinWiseSimilarity(usig1, usig2)
+
+	// If we want to continue to stream elements into the set represented by
+	// sig1, we can convert it into a MinWise instance via
+	m := minhash.NewMinWiseFromSignature(h1, h2, usig1)
+	// We can now stream in more elements an update the signature.
+	m.Push(13)
 }
+
 ```
