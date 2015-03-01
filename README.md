@@ -43,6 +43,9 @@ functions h1 and h2 generate the family h1 + k(h2).
 
 #### Usage
 
+Let's explore an example of ingesting a stream of data, sketching a signature,
+and computing the similarity between signatures.
+
 ```go
 
 package main
@@ -89,8 +92,9 @@ func main () {
 
   // Comparing signatures.
   var s float64
+  // Using a helper function that accepts MinHash interfaces.
   s = minhash.Similarity(mw1, mw2)
-  // or if we wish 
+  // or if we wish, we can call the MinWise method directly.
   // s = mw1.Similarity(mw2)
   
   // Output signatures for potential storage.  Both are of type []uint64.
@@ -104,7 +108,7 @@ func main () {
     sig1[i] = uint64(v)
     sig2[i] = uint64(sig2[i])
   }
-  // Calculate the similarities directly from the signatures.
+  // Calculate similarities using the now  appropriately typed signatures.
   simFromSigs := minhash.MinWiseSimilarity(sig1, sig2).
 
   // If we want to continue to stream elements into the set represented by
