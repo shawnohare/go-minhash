@@ -48,12 +48,12 @@ func (h *intHeap) Pop() interface{} {
 // BottomK is a bottom-k sketch of a set
 type BottomK struct {
 	size     int
-	h        HashFuncFunc
+	h        HashFunc
 	minimums *intHeap
 }
 
 // NewBottomK returns a new BottomK implementation.
-func NewBottomK(h HashFuncFunc, k int) *BottomK {
+func NewBottomK(h HashFunc, k int) *BottomK {
 	return &BottomK{
 		size:     k,
 		h:        h,
