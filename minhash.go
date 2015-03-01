@@ -1,10 +1,10 @@
 /*
 Package minhash provides probabilistic data structures for computing
-MinHash signatures for streaming data.  Additionally, it provides some
-helper functions that ingest signatures.
+MinHash signatures for streaming data.
 
-The reader should also conf https:// github.com/dgrisky/go-minhash and
-https://github.com/tylertreat/BoomFilters.
+The reader should also conf https://github.com/dgryski/go-minhash and
+https://github.com/tylertreat/BoomFilters.  In fact, most of the
+implementation details of this package are based off the former.
 
 MinHash signatures can be used to estimate the Jaccard index
 J(A, B) := |A & B| / |A || B| of two sets that are subsets

@@ -1,9 +1,9 @@
-Package mhsig provides functions for computing and comparing MinHash
-signatures for bulk (as opposed to streaming) data.  For
-probabilistic data structures that process streaming data
-confer https://github.com/dgryski/go-minhash and
-https://github.com/tylertreat/BoomFilters. The former package inspires
-many of the implementation details of the present one.
+Package minhash provides probabilistic data structures for computing
+MinHash signatures for streaming data.
+
+The reader should also confer https://github.com/dgryski/go-minhash and
+https://github.com/tylertreat/BoomFilters.  In fact, most of the
+implementation details of this package are based off the former.
 
 MinHash signatures can be used to estimate the Jaccard index
 J(A, B) := |A & B| / |A || B| of two sets that are subsets
@@ -33,6 +33,23 @@ take a family of integer-valued hash functions that are minwise
 independent, in the sense that for most sets A,
 min h(A) ! = min g(A) for two distinct hash functions in the family.
 Frequently this family is parametrically  generated.
+
+For more information,
+    http://research.neustar.biz/2012/07/09/sketch-of-the-day-k-minimum-values/
+
+    MinHashing:
+    http://infolab.stanford.edu/~ullman/mmds/ch3.pdf
+    https://en.wikipedia.org/wiki/MinHash
+
+    BottomK:
+    http://www.math.tau.ac.il/~haimk/papers/p225-cohen.pdf
+    http://cohenwang.org/edith/Papers/metrics394-cohen.pdf
+
+    http://www.mpi-inf.mpg.de/~rgemulla/publications/beyer07distinct.pdf
+
+This package works best when provided with a strong 64-bit hash function,
+such as CityHash, Spooky, Murmur3, or SipHash.
+
 
 ### MinWise
 
