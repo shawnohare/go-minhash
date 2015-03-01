@@ -61,8 +61,12 @@ func NewBottomK(h Hash64Func, k int) *BottomK {
 	}
 }
 
+func (m *BottomK) Push(x interface{}) {
+	m.PushBytes(toBytes(x))
+}
+
 // Push adds an element to the set.
-func (m *BottomK) Push(b []byte) {
+func (m *BottomK) PushBytes(b []byte) {
 
 	i64 := m.h(b)
 
