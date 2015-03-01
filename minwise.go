@@ -99,24 +99,6 @@ func (m *MinWise) Similarity(m2 *MinWise) float64 {
 	return MinWiseSimilarity(m.Signature(), m2.Signature())
 }
 
-// MinWiseSimilarity computes an estimate for the
-// Jaccard similarity of two sets given their MinWise signatures.
-func MinWiseSimilarity(sig1, sig2 []uint64) float64 {
-	if len(sig1) != len(sig2) {
-		panic("Signature size mismatch.")
-	}
-
-	intersect := 0 // counter for number of elements in intersection
-
-	for i := range sig1 {
-		if sig1[i] == sig2[i] {
-			intersect++
-		}
-	}
-
-	return float64(intersect) / float64(len(sig1))
-}
-
 // Merge combines the signatures of the second set,
 // creating the signature of their union.
 func (m *MinWise) Merge(m2 *MinWise) {
@@ -141,24 +123,6 @@ func (m *MinWise) Cardinality() int {
 	}
 
 	return int(float64(len(m.minimums)-1) / sum)
-}
-
-// Similarity computes an estimate for the similarity between the two sets.
-func (m *MinWise) Similarity(m2 *MinWise) float64 {
-
-	if len(m.minimums) != len(m2.minimums) {
-		panic("minhash minimums size mismatch")
-	}
-
-	intersect := 0
-
-	for i := range m.minimums {
-		if m.minimums[i] == m2.minimums[i] {
-			intersect++
-		}
-	}
-
-	return float64(intersect) / float64(len(m.minimums))
 }
 
 // SignatureBbit returns a b-bit reduction of the signature.  This will result in unused bits at the high-end of the words if b does not divide 64 evenly.
@@ -187,6 +151,24 @@ func (m *MinWise) SignatureBbit(b uint) []uint64 {
 	}
 
 	return sig
+}
+
+// MinWiseSimilarity computes an estimate for the
+// Jaccard similarity of two sets given their MinWise signatures.
+func MinWiseSimilarity(sig1, sig2 []uint64) float64 {
+	if len(sig1) != len(sig2) {
+		panic("Signature size mismatch.")
+	}
+
+	intersect := 0 // counter for number of elements in intersection
+
+	for i := range sig1 {
+		if sig1[i] == sig2[i] {
+			intersect++
+		}
+	}
+
+	return float64(intersect) / float64(len(sig1))
 }
 
 // SimilarityBbit computes an estimate for the similarity between two b-bit signatures

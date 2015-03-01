@@ -57,6 +57,7 @@ package minhash
 
 import (
 	"encoding/binary"
+	"log"
 	"math"
 	"strconv"
 )
@@ -98,7 +99,7 @@ type MinHash interface {
 
 // Similarity invokes the specific
 func Similarity(m1, m2 *MinHash) float64 {
-	return m1.Similarity(m2)
+	return (*m1).Similarity(m2) // dereference m1
 }
 
 // defaultSignature will return an appropriately typed array
@@ -120,9 +121,9 @@ func toBytes(x interface{}) []byte {
 	case string:
 		b = []byte(t)
 	case uint, uint16, uint32, uint64:
-		binary.LittleEndian.PutUint64(b, uint64(t))
+		binary.LittleEndian.PutUint64(b, t.(uint64))
 	case int, int16, int32, int64:
-		binary.LittleEndian.PutUint64(b, uint64(int64(t)))
+		binary.LittleEndian.PutUint64(b, uint64(t.(int64)))
 	}
 	return b
 }
@@ -133,7 +134,7 @@ func stringIntToByte(s string) []byte {
 	var b []byte
 	if err != nil {
 		log.Println("Could not convert string to uint64.")
-		b = []bytes(s)
+		b = []byte(s)
 	} else {
 		b = toBytes(n)
 	}
