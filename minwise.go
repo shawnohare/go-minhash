@@ -11,7 +11,10 @@ import (
 // hash functions of the form h1 + i*h2 for i=1, ..., k to compute
 // a MinHash signature.  Each instance is tied to a single
 // streamed set and hence single signature.  As it ingests
-// elements it will update the current signature.
+// elements it will update the current signature by calculating
+// the ith hash function on the input and replacing the current
+// ith element of the signature with the minimum of the hash
+// and current value.
 
 // The ith element of the signature is the current minimal value
 // of the ith hash function.
@@ -47,10 +50,10 @@ func InitStringIntsMinWise(h1, h2 HashFunc, size int, xs []string) *MinWise {
 
 // NOTE MinWise methods
 
-// Push updates the set's signature.  It hashes the input
+// PushBytes updates the set's signature.  It hashes the input
 // with each function in the family and compares these values
 // with the current set of minimums, replacing them as necessary.
-func (m *MinWise) Push(b []byte) {
+func (m *MinWise) PushBytes(b []byte) {
 
 	v1 := m.h1(b)
 	v2 := m.h2(b)
@@ -67,12 +70,15 @@ func (m *MinWise) Push(b []byte) {
 
 // PushStringInt first converts a string into a uint64 before pushing.
 func (m *MinWise) PushStringInt(s string) {
-	m.Push(stringIntToByte(s))
+	m.PushBytes(stringIntToByte(s))
 }
 
-// PushGeneric deals with generic data by handling byte conversion.
-func (m *MinWise) PushGeneric(x interface{}) {
-	m.Push(toBytes(x))
+// Push deals with generic data by handling byte conversion.
+// It first hashes the input with each function in the instance's family,
+// and then compares these values to the set of current minimums,
+// updating them as necessary.
+func (m *MinWise) Push(x interface{}) {
+	m.PushBytes(toBytes(x))
 }
 
 // Signature returns the current signature.

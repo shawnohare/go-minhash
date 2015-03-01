@@ -75,7 +75,7 @@ type Signature []uint64
 // a stream of the set's elements and continuously updates the signature.
 type MinHash interface {
 	// Push ingests a set element, hashes it, and updates the signature.
-	Push([]byte)
+	Push(interface{})
 
 	// Merge updates the signature of the instance with the signature
 	// of the input.  This results in the signature of the union of the
@@ -92,6 +92,11 @@ type MinHash interface {
 	// The method for computing similarity depends on whether a MinWise
 	// or Bottom-K implementation is used.
 	Similarity(*MinHash) float64
+}
+
+// Similarity invokes the specific
+func Similarity(m1, m2 *MinHash) float64 {
+	return m1.Similarity(m2)
 }
 
 // defaultSignature will return an appropriately typed array
