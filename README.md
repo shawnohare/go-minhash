@@ -56,9 +56,9 @@ import (
 )
 
 func main () {
-  // Some sets to compute the signatures of.
-  S1 : = []string{"123", "1", "2", "3", "4"}
-  S2 := []string{"34", "42", "2"}
+  // Some pre-existing sets to compute the signatures of.
+  S1 := []string{"123", "1", "2", "3", "4"}
+  S2 := []string{34, 42, 2, 9001}
   words := []string{"idempotent", "condensation", "is", "good"}
 
   // Specify two hash functions to use with a MinWise instance.
@@ -68,20 +68,49 @@ func main () {
 
   // Init a new MinWise instance to handle the words set.
   wmw := minhash.NewMinWise(h1, h2, size)
-  
+  // Ingest the words set one element at a time.
   for _, w := range words {
-    wmw.PushGeneric(w)
+    wmw.Push(w)
   }
+  // Output the signature for the words set.
   wordsSig := wmw.Signature()
 
-  // Use the constructors to deal with the integer string sets.
-  mw1 := minhash.InitStringIntsMinWise(h1, h2, size, S1)
-  mw2 :+ minhash.InitStringIntsMinWise(h1, h2, size, S2)
+  // Repeat the above, but with string integer data S1 and integer data S2.
+  mw1 := minhash.NewMinWise(h1, h2, size)
+  mw2 := minhash.NewMinWise(h1, h2, size)
+  // Ingest S1.
+  for _, x := range S1 {
+    mw1.PushStringInt(x) // Note the different push function.
+  }
+  // Ingest S2.
+  for _, x := range S2 {
+    mw2.Push(x) // we use Push for both integers and word strings.
+  }
 
-  // Compute the signature similarity.
+  // Comparing signatures.
   var s float64
   s = minhash.Similarity(mw1, mw2)
-  // or
+  // or if we wish 
   // s = mw1.Similarity(mw2)
+  
+  // Output signatures for potential storage.  Both are of type []uint64.
+  sig1 := mw1.Signature()
+  sig2 := mw2.Signature()
+  
+  // Suppose we store the sig1 and sig2 above and retrieve them as []int.
+  // We can directly compare the similarities as follows.
+  // First, convert to []uint64
+  for i, v := range sig1 {
+    sig1[i] = uint64(v)
+    sig2[i] = uint64(sig2[i])
+  }
+  // Calculate the similarities directly from the signatures.
+  simFromSigs := minhash.MinWiseSimilarity(sig1, sig2).
+
+  // If we want to continue to stream elements into the set represented by
+  // sig1, we can convert it into a MinWise instance via
+  m := NewMinWiseFromSignature(h1, h2,  sig1)
+  // We can now stream in more elements an update the signature.
+  m.Push(13)
 }
 ```
