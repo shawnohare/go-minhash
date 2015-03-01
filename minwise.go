@@ -37,16 +37,25 @@ func NewMinWise(h1, h2 HashFunc, size int) *MinWise {
 	return &mw
 }
 
+func NewMinWiseFromSignature(h1, h2 HashFunc, sig []uint64) *MinWise {
+	mw := MinWise{
+		minimums: sig,
+		h1:       h1,
+		h2:       h2,
+	}
+	return &mw
+}
+
 // InitStringIntMinWise creates a new MinWise instance and pushes a
 // set of integers (represented as strings).  The returned instance
 // contains the signature for the input set.
-func InitStringIntsMinWise(h1, h2 HashFunc, size int, xs []string) *MinWise {
-	mw := NewMinWise(h1, h2, size)
-	for _, x := range xs {
-		mw.PushStringInt(x)
-	}
-	return mw
-}
+// func NewMinWiseFromStringInts(h1, h2 HashFunc, size int, xs []string) *MinWise {
+// 	mw := NewMinWise(h1, h2, size)
+// 	for _, x := range xs {
+// 		mw.PushStringInt(x)
+// 	}
+// 	return mw
+// }
 
 // NOTE MinWise methods
 
