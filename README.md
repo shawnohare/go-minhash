@@ -78,7 +78,7 @@ import (
 func main () {
   // Some pre-existing sets to compute the signatures of.
   S1 := []string{"123", "1", "2", "3", "4"}
-  S2 := []string{34, 42, 2, 9001}
+  S2 := []int{34, 42, 2, 9001}
   words := []string{"idempotent", "condensation", "is", "good"}
 
   // Specify two hash functions to use with a MinWise instance.
