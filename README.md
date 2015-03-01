@@ -1,7 +1,7 @@
 Package mhsig provides functions for computing and comparing MinHash
 signatures for bulk (as opposed to streaming) data.  For
 probabilistic data structures that process streaming data
-confer https:// github.com/dgryski/go-minhash and
+confer https://github.com/dgryski/go-minhash and
 https://github.com/tylertreat/BoomFilters. The former package inspires
 many of the implementation details of the present one.
 
