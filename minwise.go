@@ -52,16 +52,7 @@ func (m *MinWise) Push(b []byte) {
 
 // PushStringInt converts a string representation of an integer.
 func (m *MinWise) PushStringInt(s string) {
-	n, err := strconv.ParseUint(s, 0, 64)
-	// Gracefully do not push if cannot convert.
-	var b []byte
-	if err != nil {
-		log.Println("Could not convert string to uint64.")
-		b = []bytes(s)
-	} else {
-		b = toBytes(n)
-	}
-	m.Push(b)
+	m.Push(stringIntToByte(s))
 }
 
 // PushGeneric deals with generic data by handling byte conversion.

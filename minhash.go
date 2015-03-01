@@ -120,6 +120,19 @@ func toBytes(x interface{}) []byte {
 	return b
 }
 
+// stringIntToByte converts a string representation of an integer to a byte slice.
+func stringIntToByte(s string) []byte {
+	n, err := strconv.ParseUint(s, 0, 64)
+	var b []byte
+	if err != nil {
+		log.Println("Could not convert string to uint64.")
+		b = []bytes(s)
+	} else {
+		b = toBytes(n)
+	}
+	return b
+}
+
 // Intersection estimates the cardinality of the intersection
 // between two sets provided their sizes and Jaccard similarity are known.
 //
