@@ -83,7 +83,7 @@ type MinHash interface {
 	// Merge updates the signature of the instance with the signature
 	// of the input.  This results in the signature of the union of the
 	// two sets, which is stored in the original MinHash instance.
-	Merge(*MinHash)
+	Merge(MinHash)
 
 	// Cardinality estimates the size of the set from the signature.
 	Cardinality() int
@@ -94,12 +94,12 @@ type MinHash interface {
 	// Similarity computes the similarity between two MinHash signatures.
 	// The method for computing similarity depends on whether a MinWise
 	// or Bottom-K implementation is used.
-	Similarity(*MinHash) float64
+	Similarity(MinHash) float64
 }
 
-// Similarity invokes the specific
+// Similarity invokes the MinHash implementation's Similarity method.
 func Similarity(m1, m2 MinHash) float64 {
-	return m1.Similarity(&m2)
+	return m1.Similarity(m2)
 }
 
 // defaultSignature will return an appropriately typed array
@@ -120,10 +120,22 @@ func toBytes(x interface{}) []byte {
 		b = t
 	case string:
 		b = []byte(t)
-	case uint, uint16, uint32, uint64:
-		binary.LittleEndian.PutUint64(b, t.(uint64))
-	case int, int16, int32, int64:
-		binary.LittleEndian.PutUint64(b, uint64(t.(int64)))
+	case uint:
+		binary.LittleEndian.PutUint64(b, uint64(t))
+	case uint16:
+		binary.LittleEndian.PutUint64(b, uint64(t))
+	case uint32:
+		binary.LittleEndian.PutUint64(b, uint64(t))
+	case uint64:
+		binary.LittleEndian.PutUint64(b, t)
+	case int:
+		binary.LittleEndian.PutUint64(b, uint64(t))
+	case int16:
+		binary.LittleEndian.PutUint64(b, uint64(t))
+	case int32:
+		binary.LittleEndian.PutUint64(b, uint64(t))
+	case int64:
+		binary.LittleEndian.PutUint64(b, uint64(t))
 	}
 	return b
 }
