@@ -56,7 +56,8 @@ such as CityHash, Spooky, Murmur3, or SipHash.
 The **MinWise** data structure computes the MinHash for a set by
 creating a parametric family of hash functions.  It is initialized
 with two hash functions and an integer size parameter.  The two hash
-functions h1 and h2 generate the family h1 + k(h2).
+functions h1 and h2 generate the family h1 + i\*(h2) for i=1, ..., n,
+where n is the size of the signature we wish to compute.
 
 #### Usage
 
