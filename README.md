@@ -67,6 +67,8 @@ and computing the similarity between signatures.
 package main
 
 import (
+	"log"
+
 	"github.com/dgryski/go-farm"
 	"github.com/dgryski/go-spooky"
 	"github.com/shawnohare/go-minhash"
@@ -74,8 +76,8 @@ import (
 
 func main() {
 	// Some pre-existing sets to compute the signatures of.
-	S1 := []string{"123", "1", "2", "3", "4"}
-	S2 := []int{34, 42, 2, 9001}
+	S1 := []string{"5", "1", "2", "3", "4"}
+	S2 := []int{1, 2, 3, 4, 5}
 	words := []string{"idempotent", "condensation", "is", "good"}
 
 	// Specify two hash functions to use with a MinWise instance.
@@ -91,6 +93,7 @@ func main() {
 	}
 	// Output the signature for the words set.
 	wordsSig := wmw.Signature()
+	log.Println("Signature for words set:", wordsSig)
 
 	// Repeat the above, but with string integer data S1 and integer data S2.
 	mw1 := minhash.NewMinWise(h1, h2, size)
@@ -107,9 +110,10 @@ func main() {
 	// Comparing signatures.
 	var s float64
 	// Using a helper function that accepts MinHash interfaces.
-	s = minhash.Similarity(*mw1, *mw2)
+	s = minhash.Similarity(mw1, mw2)
 	// or if we wish, we can call the MinWise method directly.
 	// s = mw1.Similarity(mw2)
+	log.Println("Similarity between signatures of S1 and S2:", s)
 
 	// Output signatures for potential storage.  Both are of type []uint64.
 	sig1 := mw1.Signature()
@@ -126,12 +130,17 @@ func main() {
 	}
 	// Calculate similarities using the now  appropriately typed signatures.
 	simFromSigs := minhash.MinWiseSimilarity(usig1, usig2)
+	log.Println("Similarity calcuted directly from signatures: ", simFromSigs)
 
 	// If we want to continue to stream elements into the set represented by
 	// sig1, we can convert it into a MinWise instance via
 	m := minhash.NewMinWiseFromSignature(h1, h2, usig1)
 	// We can now stream in more elements an update the signature.
-	m.Push(13)
+	for i := 20; i <= 50; i++ {
+		m.Push(i)
+	}
+	// Calculate new similarity between updated S1 and S2
+	newSim := m.Similarity(mw2)
+	log.Println("New similarity between signatures for S1 and S2:", newSim)
 }
-
 ```
