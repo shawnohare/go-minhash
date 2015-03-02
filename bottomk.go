@@ -1,22 +1,3 @@
-// Package minhash implements the bottom-k sketch for streaming set similarity.
-/*
-
-For more information,
-    http://research.neustar.biz/2012/07/09/sketch-of-the-day-k-minimum-values/
-
-    MinHashing:
-    http://infolab.stanford.edu/~ullman/mmds/ch3.pdf
-    https://en.wikipedia.org/wiki/MinHash
-
-    BottomK:
-    http://www.math.tau.ac.il/~haimk/papers/p225-cohen.pdf
-    http://cohenwang.org/edith/Papers/metrics394-cohen.pdf
-
-    http://www.mpi-inf.mpg.de/~rgemulla/publications/beyer07distinct.pdf
-
-This package works best when provided with a strong 64-bit hash function, such as CityHash, Spooky, Murmur3, or SipHash.
-
-*/
 package minhash
 
 import (
@@ -63,6 +44,10 @@ func NewBottomK(h HashFunc, k int) *BottomK {
 
 func (m *BottomK) Push(x interface{}) {
 	m.PushBytes(toBytes(x))
+}
+
+func (m *BottomK) PushStringInt(x string) {
+	m.Push(stringIntToBytes(x))
 }
 
 // Push adds an element to the set.
