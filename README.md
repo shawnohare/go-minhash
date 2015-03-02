@@ -36,12 +36,12 @@ Frequently this family is parametrically  generated.
 
 For more information:
 
-####  MinHashing
+**MinHashing**
 -  http://research.neustar.biz/2012/07/09/sketch-of-the-day-k-minimum-values/
 -  http://infolab.stanford.edu/~ullman/mmds/ch3.pdf
 -  https://en.wikipedia.org/wiki/MinHash
 
-#### BottomK
+**BottomK**
 -  http://www.math.tau.ac.il/~haimk/papers/p225-cohen.pdf
 -  http://cohenwang.org/edith/Papers/metrics394-cohen.pdf
 - http://www.mpi-inf.mpg.de/~rgemulla/publications/beyer07distinct.pdf
