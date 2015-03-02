@@ -76,7 +76,7 @@ func (m *MinWise) PushBytes(b []byte) {
 
 // PushStringInt first converts a string into a uint64 before pushing.
 func (m *MinWise) PushStringInt(s string) {
-	m.PushBytes(stringIntToByte(s))
+	m.PushBytes(stringIntToBytes(s))
 }
 
 // Push deals with generic data by handling byte conversion.
@@ -95,13 +95,13 @@ func (m *MinWise) Signature() []uint64 {
 // Similarity computes the similarity of two signatures represented
 // as MinWise instances.  This estimates the Jaccard index of the
 // two underlying sets.
-func (m *MinWise) Similarity(m2 MinHash) float64 {
+func (m *MinWise) Similarity(m2 *MinWise) float64 {
 	return MinWiseSimilarity(m.Signature(), m2.Signature())
 }
 
 // Merge combines the signatures of the second set,
 // creating the signature of their union.
-func (m *MinWise) Merge(m2 MinHash) {
+func (m *MinWise) Merge(m2 *MinWise) {
 
 	for i, v := range m2.Signature() {
 
