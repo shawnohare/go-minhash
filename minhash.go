@@ -141,7 +141,7 @@ func toBytes(x interface{}) []byte {
 }
 
 // stringIntToByte converts a string representation of an integer to a byte slice.
-func stringIntToByte(s string) []byte {
+func stringIntToBytes(s string) []byte {
 	n, err := strconv.ParseUint(s, 0, 64)
 	var b []byte
 	if err != nil {
@@ -155,7 +155,6 @@ func stringIntToByte(s string) []byte {
 
 // Intersection computes the cardinality of the intersection
 // between two sets provided their sizes and Jaccard similarity are known.
-//
 func Intersection(js float64, size1, size2 int) int {
 	var est int
 	if js == 0 {
