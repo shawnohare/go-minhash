@@ -95,15 +95,15 @@ func (m *MinWise) Signature() []uint64 {
 // Similarity computes the similarity of two signatures represented
 // as MinWise instances.  This estimates the Jaccard index of the
 // two underlying sets.
-func (m *MinWise) Similarity(m2 *MinWise) float64 {
+func (m *MinWise) Similarity(m2 MinHash) float64 {
 	return MinWiseSimilarity(m.Signature(), m2.Signature())
 }
 
 // Merge combines the signatures of the second set,
 // creating the signature of their union.
-func (m *MinWise) Merge(m2 *MinWise) {
+func (m *MinWise) Merge(m2 MinHash) {
 
-	for i, v := range m2.minimums {
+	for i, v := range m2.Signature() {
 
 		if v < m.minimums[i] {
 			m.minimums[i] = v
