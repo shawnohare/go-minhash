@@ -81,33 +81,40 @@ func main() {
 	S2 := []int{1, 2, 3, 4, 5}
 	words := []string{"idempotent", "condensation", "is", "good"}
 
-	// Specify two hash functions to use with a MinWise instance.
+	// Specify two hash functions to initialize all our MinWise instances
+  // with.  These two hash functions generate a parametric family
+  // of hash functions of cardinality = size.
 	h1 := spooky.Hash64
 	h2 := farm.Hash64
 	size := 3
 
-	// Init a new MinWise instance to handle the words set.
-	wmw := minhash.NewMinWise(h1, h2, size)
+	// Init a MinWise instance for each set above.
+	wmw := minhash.NewMinWise(h1, h2, size) // handle words set
+  mw1 := minhash.NewMinWise(h1, h2, size) // handle S1
+	mw2 := minhash.NewMinWise(h1, h2, size) // handle S2
+
 	// Ingest the words set one element at a time.
 	for _, w := range words {
 		wmw.Push(w)
 	}
-	// Output the signature for the words set.
-	wordsSig := wmw.Signature()
-	log.Println("Signature for words set:", wordsSig)
+
 
 	// Repeat the above, but with string integer data S1 and integer data S2.
-	mw1 := minhash.NewMinWise(h1, h2, size)
-	mw2 := minhash.NewMinWise(h1, h2, size)
-	// Ingest S1.
+	
+  // Ingest S1.
 	for _, x := range S1 {
 		mw1.PushStringInt(x) // Note the different push function.
 	}
-	// Ingest S2.
+
+  // Ingest S2.
 	for _, x := range S2 {
 		mw2.Push(x) // we use Push for both integers and word strings.
 	}
-
+  
+  // NOTE In the above we used the Push and PushStringInt methods.
+  // If the data is already represented as a set of []byte elements,
+  // then the PushBytes function is slightly more efficient.
+  
 	// Comparing signatures.
 	var s float64
 	// Using a helper function that accepts MinHash interfaces.
@@ -116,11 +123,17 @@ func main() {
 	// s = mw1.Similarity(mw2)
 	log.Println("Similarity between signatures of S1 and S2:", s)
 
-	// Output signatures for potential storage.  Both are of type []uint64.
-	sig1 := mw1.Signature()
-	sig2 := mw2.Signature()
-
-	// Suppose we store the sig1 and sig2 above and retrieve them as []int.
+	// Output signatures for potential storage. 
+  var wordSig []uint64 
+  var sig1 []uint64 
+  var sig2 []uint64 
+  wordsSig = wmw.Signature()
+	sig1 = mw1.Signature()
+	sig2 = mw2.Signature()
+	log.Println("Signature for words set:", wordsSig)
+  
+  // Computing similarity of signatures directly.
+  // Suppose we store sig1 and sig2 above and retrieve them as []int.
 	// We can directly compare the similarities as follows.
 	usig1 := make([]uint64, len(sig1))
 	usig2 := make([]uint64, len(sig2))
@@ -129,10 +142,11 @@ func main() {
 		usig1[i] = uint64(v)
 		usig2[i] = uint64(sig2[i])
 	}
-	// Calculate similarities using the now  appropriately typed signatures.
+	// Calculate similarities using the now appropriately typed signatures.
 	simFromSigs := minhash.MinWiseSimilarity(usig1, usig2)
 	log.Println("Similarity calcuted directly from signatures: ", simFromSigs)
-
+  
+  // Construct a MinWise instance from a signature.
 	// If we want to continue to stream elements into the set represented by
 	// sig1, we can convert it into a MinWise instance via
 	m := minhash.NewMinWiseFromSignature(h1, h2, usig1)
