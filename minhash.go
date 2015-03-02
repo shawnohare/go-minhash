@@ -73,34 +73,34 @@ type HashFunc func([]byte) uint64
 // Signature is an array representing the signature of a set.
 type Signature []uint64
 
-// MinHash is an a probabilistic data structure used to
-// compute a similarity preserving signature for a set.  It ingests
-// a stream of the set's elements and continuously updates the signature.
-type MinHash interface {
-	// Push ingests a set element, hashes it, and updates the signature.
-	Push(interface{})
+// // MinHash is an a probabilistic data structure used to
+// // compute a similarity preserving signature for a set.  It ingests
+// // a stream of the set's elements and continuously updates the signature.
+// type MinHash interface {
+// 	// Push ingests a set element, hashes it, and updates the signature.
+// 	Push(interface{})
 
-	// Merge updates the signature of the instance with the signature
-	// of the input.  This results in the signature of the union of the
-	// two sets, which is stored in the original MinHash instance.
-	Merge(MinHash)
+// 	// Merge updates the signature of the instance with the signature
+// 	// of the input.  This results in the signature of the union of the
+// 	// two sets, which is stored in the original MinHash instance.
+// 	Merge(MinHash)
 
-	// Cardinality estimates the size of the set from the signature.
-	Cardinality() int
+// 	// Cardinality estimates the size of the set from the signature.
+// 	Cardinality() int
 
-	// Signature returns the signature itself.
-	Signature() []uint64
+// 	// Signature returns the signature itself.
+// 	Signature() []uint64
 
-	// Similarity computes the similarity between two MinHash signatures.
-	// The method for computing similarity depends on whether a MinWise
-	// or Bottom-K implementation is used.
-	Similarity(MinHash) float64
-}
+// 	// Similarity computes the similarity between two MinHash signatures.
+// 	// The method for computing similarity depends on whether a MinWise
+// 	// or Bottom-K implementation is used.
+// 	Similarity(MinHash) float64
+// }
 
-// Similarity invokes the MinHash implementation's Similarity method.
-func Similarity(m1, m2 MinHash) float64 {
-	return m1.Similarity(m2)
-}
+// // Similarity invokes the MinHash implementation's Similarity method.
+// func Similarity(m1, m2 MinHash) float64 {
+// 	return m1.Similarity(m2)
+// }
 
 // defaultSignature will return an appropriately typed array
 func defaultSignature(size int) Signature {
@@ -153,21 +153,19 @@ func stringIntToByte(s string) []byte {
 	return b
 }
 
-// Intersection estimates the cardinality of the intersection
+// Intersection computes the cardinality of the intersection
 // between two sets provided their sizes and Jaccard similarity are known.
 //
-// If n, m, i, u denote |A|, |B|, |A & B|, and |A || B| respectively,
-// then given that A and B are not disjoint (i != 0), w have
-// J := J(A, B) = i / u which is equivalent to
-// 1/J = u / i = (n + m - i) / i = (n + m / i) - 1.
-// Solving for i yields |A & B| = (n + m) / ((1/J)+ 1).
-// Thus an estimate for the Jaccard index of A and B yields an estimate
-// for the size of their intersection, provided we know the sizes of A and B.
 func Intersection(js float64, size1, size2 int) int {
 	var est int
 	if js == 0 {
 		est = 0
 	} else {
+		// If n, m, i, u denote |A|, |B|, |A & B|, and |A || B| respectively,
+		// then given that A and B are not disjoint (i != 0), w have
+		// J := J(A, B) = i / u which is equivalent to
+		// 1/J = u / i = (n + m - i) / i = (n + m / i) - 1.
+		// Solving for i yields |A & B| = (n + m) / ((1/J)+ 1).
 		est = int(math.Floor(float64(size1+size2) / ((1.0 / js) + 1)))
 	}
 	return est
