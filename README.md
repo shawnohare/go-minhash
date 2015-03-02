@@ -34,18 +34,17 @@ independent, in the sense that for most sets A,
 min h(A) ! = min g(A) for two distinct hash functions in the family.
 Frequently this family is parametrically  generated.
 
-For more information,
-    http://research.neustar.biz/2012/07/09/sketch-of-the-day-k-minimum-values/
+For more information:
 
-    MinHashing:
-    http://infolab.stanford.edu/~ullman/mmds/ch3.pdf
-    https://en.wikipedia.org/wiki/MinHash
+####  MinHashing
+-  http://research.neustar.biz/2012/07/09/sketch-of-the-day-k-minimum-values/
+-  http://infolab.stanford.edu/~ullman/mmds/ch3.pdf
+-  https://en.wikipedia.org/wiki/MinHash
 
-    BottomK:
-    http://www.math.tau.ac.il/~haimk/papers/p225-cohen.pdf
-    http://cohenwang.org/edith/Papers/metrics394-cohen.pdf
-
-    http://www.mpi-inf.mpg.de/~rgemulla/publications/beyer07distinct.pdf
+#### BottomK
+-  http://www.math.tau.ac.il/~haimk/papers/p225-cohen.pdf
+-  http://cohenwang.org/edith/Papers/metrics394-cohen.pdf
+- http://www.mpi-inf.mpg.de/~rgemulla/publications/beyer07distinct.pdf
 
 This package works best when provided with a strong 64-bit hash function,
 such as CityHash, Spooky, Murmur3, or SipHash.
