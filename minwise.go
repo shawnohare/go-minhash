@@ -35,6 +35,8 @@ func NewMinWise(h1, h2 HashFunc, size int) *MinWise {
 }
 
 func NewMinWiseFromSignature(h1, h2 HashFunc, sig []uint64) *MinWise {
+	csig := make([]uint64, len(sig))
+	copy(csig, sig)
 	mw := MinWise{
 		minimums: sig,
 		h1:       h1,
@@ -87,9 +89,11 @@ func (m *MinWise) Push(x interface{}) {
 	m.PushBytes(toBytes(x))
 }
 
-// Signature returns the current signature.
+// Signature returns a copy of the  current signature.
 func (m *MinWise) Signature() []uint64 {
-	return m.minimums
+	sig := make([]uint64, len(m.minimums))
+	copy(sig, m.minimums)
+	return sig
 }
 
 // Similarity computes the similarity of two signatures represented
@@ -103,7 +107,7 @@ func (m *MinWise) Similarity(m2 *MinWise) float64 {
 // creating the signature of their union.
 func (m *MinWise) Merge(m2 *MinWise) {
 
-	for i, v := range m2.Signature() {
+	for i, v := range m2.minimums {
 
 		if v < m.minimums[i] {
 			m.minimums[i] = v
@@ -125,7 +129,17 @@ func (m *MinWise) Cardinality() int {
 	return int(float64(len(m.minimums)-1) / sum)
 }
 
-// SignatureBbit returns a b-bit reduction of the signature.  This will result in unused bits at the high-end of the words if b does not divide 64 evenly.
+// IntersectionCardinality estimates the cardinality of the intersection.
+func (m *MinWise) IntersectionCardinality(m2 *MinWise) int {
+	// Compute the signature for the union.
+	u := NewMinWiseFromSignature(m.h1, m.h2, m.Signature())
+	u.Merge(m2)
+
+	return m.Cardinality() + m2.Cardinality() - u.Cardinality()
+}
+
+// SignatureBbit returns a b-bit reduction of the signature.
+// This will result in unused bits at the high-end of the words if b does not divide 64 evenly.
 func (m *MinWise) SignatureBbit(b uint) []uint64 {
 
 	var sig []uint64 // full signature
