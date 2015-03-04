@@ -135,7 +135,14 @@ func (m *MinWise) IntersectionCardinality(m2 *MinWise) int {
 	u := NewMinWiseFromSignature(m.h1, m.h2, m.Signature())
 	u.Merge(m2)
 
-	return m.Cardinality() + m2.Cardinality() - u.Cardinality()
+	// |A & B| + |A || B| = |A| +|B|
+	est := m.Cardinality() + m2.Cardinality() - u.Cardinality()
+	// Take absolute value.
+	if est < 0 {
+		est = 0
+	}
+
+	return est
 }
 
 // SignatureBbit returns a b-bit reduction of the signature.
