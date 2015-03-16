@@ -164,7 +164,7 @@ func (m *MinWise) SymmetricDifferenceCardinality(m2 *MinWise) int {
 
 // LessCardinality estimates the cardinality of the left set minus
 // the right set. This operator is not symmetric.
-func (m *MinWise) LessCardinality(m2 *MinWise) {
+func (m *MinWise) LessCardinality(m2 *MinWise) int {
 	est := m.Cardinality() - m.IntersectionCardinality(m2)
 	if est < 0 {
 		est = 0
