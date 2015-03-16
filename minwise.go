@@ -129,15 +129,43 @@ func (m *MinWise) Cardinality() int {
 	return int(float64(len(m.minimums)-1) / sum)
 }
 
-// IntersectionCardinality estimates the cardinality of the intersection.
-func (m *MinWise) IntersectionCardinality(m2 *MinWise) int {
-	// Compute the signature for the union.
+// UnionCardinality estimates the cardinality of the union.
+func (m *MinWise) UnionCardinality(m2 *MinWise) int {
 	u := NewMinWiseFromSignature(m.h1, m.h2, m.Signature())
 	u.Merge(m2)
+	return u.Cardinality()
+}
+
+// IntersectionCardinality estimates the cardinality of the intersection.
+func (m *MinWise) IntersectionCardinality(m2 *MinWise) int {
+	// Estimate size of the union.
+	u := m.UnionCardinality(m2)
 
 	// |A & B| + |A || B| = |A| +|B|
-	est := m.Cardinality() + m2.Cardinality() - u.Cardinality()
+	est := m.Cardinality() + m2.Cardinality() - u
 	// Take absolute value.
+	if est < 0 {
+		est = 0
+	}
+
+	return est
+}
+
+// SymmetricDifferenceCardinality estimates the difference between
+// the cardinality of the union and intersection.
+func (m *MinWise) SymmetricDifferenceCardinality(m2 *MinWise) int {
+	est := m.UnionCardinality(m2) - m.IntersectionCardinality(m2)
+	if est < 0 {
+		est = 0
+	}
+
+	return est
+}
+
+// LessCardinality estimates the cardinality of the left set minus
+// the right set. This operator is not symmetric.
+func (m *MinWise) LessCardinality(m2 *MinWise) {
+	est := m.Cardinality() - m.IntersectionCardinality(m2)
 	if est < 0 {
 		est = 0
 	}
