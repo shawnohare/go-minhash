@@ -58,6 +58,21 @@ func NewMinWiseFromSignature(h1, h2 HashFunc, sig []uint64) *MinWise {
 
 // NOTE MinWise methods
 
+// IsEmpty reports whether the MinWise instance represents a signature
+// of the empty set.  Note that it's possible for a signature of a
+// non-empty set to equal the signature for the empty set in rare
+// circumstances (e.g., when the hash family is not min-wise independent).
+func (m *MinWise) IsEmpty() bool {
+	report := true
+	for _, m := range m.minimums {
+		if m < infinity {
+			report = false
+			break
+		}
+	}
+	return report
+}
+
 // PushBytes updates the set's signature.  It hashes the input
 // with each function in the family and compares these values
 // with the current set of minimums, replacing them as necessary.
