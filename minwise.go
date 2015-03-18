@@ -38,7 +38,7 @@ func NewMinWiseFromSignature(h1, h2 HashFunc, sig []uint64) *MinWise {
 	csig := make([]uint64, len(sig))
 	copy(csig, sig)
 	mw := MinWise{
-		minimums: sig,
+		minimums: csig,
 		h1:       h1,
 		h2:       h2,
 	}
@@ -71,6 +71,11 @@ func (m *MinWise) IsEmpty() bool {
 		}
 	}
 	return report
+}
+
+// Copy returns a new MinWise instance with the same type and data.
+func (m *MinWise) Copy() *MinWise {
+	return NewMinWiseFromSignature(m.h1, m.h2, m.Signature())
 }
 
 // PushBytes updates the set's signature.  It hashes the input
