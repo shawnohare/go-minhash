@@ -76,31 +76,31 @@ type Signature []uint64
 // // MinHash is an a probabilistic data structure used to
 // // compute a similarity preserving signature for a set.  It ingests
 // // a stream of the set's elements and continuously updates the signature.
-// type MinHash interface {
-// 	// Push ingests a set element, hashes it, and updates the signature.
-// 	Push(interface{})
+type MinHash interface {
+	// 	// Push ingests a set element, hashes it, and updates the signature.
+	// 	Push(interface{})
 
-// 	// Merge updates the signature of the instance with the signature
-// 	// of the input.  This results in the signature of the union of the
-// 	// two sets, which is stored in the original MinHash instance.
-// 	Merge(MinHash)
+	// 	// Merge updates the signature of the instance with the signature
+	// 	// of the input.  This results in the signature of the union of the
+	// 	// two sets, which is stored in the original MinHash instance.
+	// 	Merge(MinHash)
 
-// 	// Cardinality estimates the size of the set from the signature.
-// 	Cardinality() int
+	// 	// Cardinality estimates the size of the set from the signature.
+	// 	Cardinality() int
 
-// 	// Signature returns the signature itself.
-// 	Signature() []uint64
+	// Signature returns the signature itself.
+	Signature() []uint64
 
-// 	// Similarity computes the similarity between two MinHash signatures.
-// 	// The method for computing similarity depends on whether a MinWise
-// 	// or Bottom-K implementation is used.
-// 	Similarity(MinHash) float64
-// }
+	// 	// Similarity computes the similarity between two MinHash signatures.
+	// 	// The method for computing similarity depends on whether a MinWise
+	// 	// or Bottom-K implementation is used.
+	// 	Similarity(MinHash) float64
+	// }
 
-// // Similarity invokes the MinHash implementation's Similarity method.
-// func Similarity(m1, m2 MinHash) float64 {
-// 	return m1.Similarity(m2)
-// }
+	// // Similarity invokes the MinHash implementation's Similarity method.
+	// func Similarity(m1, m2 MinHash) float64 {
+	// 	return m1.Similarity(m2)
+}
 
 // defaultSignature will return an appropriately typed array
 func defaultSignature(size int) Signature {
@@ -168,4 +168,19 @@ func Intersection(js float64, size1, size2 int) int {
 		est = int(math.Floor(float64(size1+size2) / ((1.0 / js) + 1)))
 	}
 	return est
+}
+
+func IsEmpty(m MinHash) bool {
+	var empty = true
+
+	if m != nil {
+		// Check whether each minimum is infinite.
+		for _, v := range m.Signature() {
+			if v < infinity {
+				empty = false
+				break
+			}
+		}
+	}
+	return empty
 }

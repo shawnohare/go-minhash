@@ -63,14 +63,7 @@ func NewMinWiseFromSignature(h1, h2 HashFunc, sig []uint64) *MinWise {
 // non-empty set to equal the signature for the empty set in rare
 // circumstances (e.g., when the hash family is not min-wise independent).
 func (m *MinWise) IsEmpty() bool {
-	report := true
-	for _, m := range m.minimums {
-		if m < infinity {
-			report = false
-			break
-		}
-	}
-	return report
+	return IsEmpty(m)
 }
 
 // Copy returns a new MinWise instance with the same type and data.
