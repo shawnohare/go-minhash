@@ -57,7 +57,6 @@ package minhash
 
 import (
 	"encoding/binary"
-	"log"
 	"math"
 	"strconv"
 )
@@ -145,7 +144,7 @@ func stringIntToBytes(s string) []byte {
 	n, err := strconv.ParseUint(s, 0, 64)
 	var b []byte
 	if err != nil {
-		log.Println("Could not convert string to uint64.")
+		// Use literal conversion if string conversion failed.
 		b = []byte(s)
 	} else {
 		b = toBytes(n)
