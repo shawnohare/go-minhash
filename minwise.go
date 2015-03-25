@@ -102,25 +102,23 @@ func (m *MinWise) Push(x interface{}) {
 	m.PushBytes(toBytes(x))
 }
 
-// Signature returns a copy of the  current signature.
+// Signature returns  the  current signature.
 func (m *MinWise) Signature() []uint64 {
-	sig := make([]uint64, len(m.minimums))
-	copy(sig, m.minimums)
-	return sig
+	return m.minimums
 }
 
 // Similarity computes the similarity of two signatures represented
 // as MinWise instances.  This estimates the Jaccard index of the
 // two underlying sets.
-func (m *MinWise) Similarity(m2 *MinWise) float64 {
+func (m *MinWise) Similarity(m2 MinHash) float64 {
 	return MinWiseSimilarity(m.Signature(), m2.Signature())
 }
 
 // Merge combines the signatures of the second set,
 // creating the signature of their union.
-func (m *MinWise) Merge(m2 *MinWise) {
+func (m *MinWise) Merge(m2 MinHash) {
 
-	for i, v := range m2.minimums {
+	for i, v := range m2.Signature() {
 
 		if v < m.minimums[i] {
 			m.minimums[i] = v
@@ -143,14 +141,14 @@ func (m *MinWise) Cardinality() int {
 }
 
 // UnionCardinality estimates the cardinality of the union.
-func (m *MinWise) UnionCardinality(m2 *MinWise) int {
+func (m *MinWise) UnionCardinality(m2 MinHash) int {
 	u := NewMinWiseFromSignature(m.h1, m.h2, m.Signature())
 	u.Merge(m2)
 	return u.Cardinality()
 }
 
 // IntersectionCardinality estimates the cardinality of the intersection.
-func (m *MinWise) IntersectionCardinality(m2 *MinWise) int {
+func (m *MinWise) IntersectionCardinality(m2 MinHash) int {
 	// Estimate size of the union.
 	u := m.UnionCardinality(m2)
 
@@ -177,7 +175,7 @@ func (m *MinWise) SymmetricDifferenceCardinality(m2 *MinWise) int {
 
 // LessCardinality estimates the cardinality of the left set minus
 // the right set. This operator is not symmetric.
-func (m *MinWise) LessCardinality(m2 *MinWise) int {
+func (m *MinWise) LessCardinality(m2 MinHash) int {
 	est := m.Cardinality() - m.IntersectionCardinality(m2)
 	if est < 0 {
 		est = 0

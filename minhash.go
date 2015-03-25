@@ -84,8 +84,8 @@ type MinHash interface {
 	// 	// two sets, which is stored in the original MinHash instance.
 	// 	Merge(MinHash)
 
-	// 	// Cardinality estimates the size of the set from the signature.
-	// 	Cardinality() int
+	// Cardinality estimates the size of the set from the signature.
+	Cardinality() int
 
 	// Signature returns the signature itself.
 	Signature() []uint64
