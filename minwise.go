@@ -130,14 +130,31 @@ func (m *MinWise) Merge(m2 MinHash) {
 func (m *MinWise) Cardinality() int {
 
 	// http://www.cohenwang.com/edith/Papers/tcest.pdf
+	// Let h be a hash function.
+	// With M as the the maximum uint64, the value
+	// z := -ln( (M - min h(A)) / M)
+	// is a sample from Z := min { X1 ~ Exp(1), ... , Xn ~ Exp(1)}.
+	// where n := |A|.  But Z ~ Exp(n) has mean 1/n.
+	// Thus the inverse of the mean of all the transformed signature values
+	// is an estimate for |A|.
+	var cardinality int
+	sum := 0.0 // running sum
 
-	sum := 0.0
-
+	// Use inverse transform sampling to obtain a sample from Z
+	// for each signature element.
 	for _, v := range m.minimums {
-		sum += -math.Log(float64(infinity-v) / float64(infinity))
+		d := float64(infinity - v)
+		// d should only be 0 for the signature of the empty set.
+		if d > 0 {
+			sum += -math.Log(d / float64(infinity))
+		}
 	}
 
-	return int(float64(len(m.minimums)-1) / sum)
+	if sum != 0.0 {
+		cardinality = int(float64(len(m.minimums)) / sum)
+	}
+
+	return cardinality
 }
 
 // UnionCardinality estimates the cardinality of the union.
