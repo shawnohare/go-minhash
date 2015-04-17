@@ -25,7 +25,7 @@ type MinWise struct {
 
 // NewMinWise constructs a new instance and pushes the optional elements.
 func NewMinWise(h1, h2 HashFunc, size int, elements ...interface{}) *MinWise {
-	mw := MinWise{
+	mw := &MinWise{
 		minimums: defaultSignature(size), // running set of min values
 		h1:       h1,
 		h2:       h2,
@@ -35,7 +35,7 @@ func NewMinWise(h1, h2 HashFunc, size int, elements ...interface{}) *MinWise {
 		mw.Push(e)
 	}
 
-	return &mw
+	return mw
 }
 
 func NewMinWiseFromSignature(h1, h2 HashFunc, sig []uint64) *MinWise {
