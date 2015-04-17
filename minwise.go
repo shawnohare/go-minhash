@@ -23,14 +23,18 @@ type MinWise struct {
 
 // NOTE MinWise constructors.
 
-// NewMinWise constructs a new MinWise instance initialized with
-// the empty set.
-func NewMinWise(h1, h2 HashFunc, size int) *MinWise {
+// NewMinWise constructs a new instance and pushes the optional elements.
+func NewMinWise(h1, h2 HashFunc, size int, elements ...interface{}) *MinWise {
 	mw := MinWise{
 		minimums: defaultSignature(size), // running set of min values
 		h1:       h1,
 		h2:       h2,
 	}
+
+	for _, e := range elements {
+		mw.Push(e)
+	}
+
 	return &mw
 }
 
