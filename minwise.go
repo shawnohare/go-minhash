@@ -181,7 +181,7 @@ func (m *MinWise) IntersectionCardinality(m2 MinHash) int {
 
 // SymmetricDifferenceCardinality estimates the difference between
 // the cardinality of the union and intersection.
-func (m *MinWise) SymmetricDifferenceCardinality(m2 *MinWise) int {
+func (m *MinWise) SymmetricDifferenceCardinality(m2 MinHash) int {
 	est := m.UnionCardinality(m2) - m.IntersectionCardinality(m2)
 	if est < 0 {
 		est = 0
