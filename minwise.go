@@ -163,9 +163,9 @@ func (m *MinWise) Cardinality() int {
 
 // UnionCardinality estimates the cardinality of the union.
 func (m *MinWise) UnionCardinality(m2 MinHash) int {
-	u := NewMinWiseFromSignature(m.h1, m.h2, m.Signature())
-	u.Merge(m2)
-	return u.Cardinality()
+	union := m.Copy()
+	union.Merge(m2)
+	return union.Cardinality()
 }
 
 // IntersectionCardinality estimates the cardinality of the intersection.

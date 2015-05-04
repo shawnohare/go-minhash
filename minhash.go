@@ -101,6 +101,10 @@ type MinHash interface {
 	// 	return m1.Similarity(m2)
 }
 
+type Interface interface {
+	Signature() []uint64
+}
+
 // defaultSignature will return an appropriately typed array
 func defaultSignature(size int) Signature {
 	s := make(Signature, size)

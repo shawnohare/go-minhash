@@ -1,13 +1,46 @@
 package minhash
 
 import (
-	"github.com/stretchr/testify/assert"
+	"log"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/dgryski/go-farm"
+	"github.com/dgryski/go-spooky"
 )
 
-// dummy hash function
-func h1(bs []byte) uint64 {
-	return uint64(len(bs) + 1)
+var h1 = farm.Hash64
+var h2 = spooky.Hash64
+
+// Two signatures.
+
+func makeSigOfInts() *MinWise {
+	var sig = NewMinWise(h1, h2, 400)
+	for i := 0; i <= 10000; i++ {
+		sig.Push(i)
+	}
+	return sig
+}
+
+func makeSigOfEvens() *MinWise {
+	var sig = NewMinWise(h1, h2, 400)
+	for i := 0; i <= 10000; i++ {
+		if i%2 == 0 {
+			sig.Push(i)
+		}
+	}
+	return sig
+}
+
+func makeSigOfOdds() *MinWise {
+	var sig = NewMinWise(h1, h2, 400)
+	for i := 0; i <= 10000; i++ {
+		if i%2 == 1 {
+			sig.Push(i)
+		}
+	}
+	return sig
 }
 
 // Produce a new signature from input, if it's specified,
@@ -15,32 +48,35 @@ func h1(bs []byte) uint64 {
 func newDummyMinWise(sig []uint64) *MinWise {
 	var m *MinWise
 	if len(sig) > 0 {
-		m = NewMinWiseFromSignature(h1, h1, sig)
+		m = NewMinWiseFromSignature(h1, h2, sig)
 	} else {
-		m = NewMinWise(h1, h1, 5)
+		m = NewMinWise(h1, h2, 5)
 	}
 
 	return m
 }
 
 func TestCardinality(t *testing.T) {
-	var testCases = []struct {
-		sig  *MinWise
-		card int
-	}{
-		{
-			sig:  newDummyMinWise(nil),
-			card: 0,
-		},
-		{
-			sig:  newDummyMinWise([]uint64{0, 0}),
-			card: 0,
-		},
-	}
 
-	for _, tt := range testCases {
-		assert.Equal(t, tt.card, tt.sig.Cardinality())
-	}
+	sigInts := makeSigOfInts()   // I
+	sigEvens := makeSigOfEvens() // E
+	sigOdds := makeSigOfOdds()   // O
+
+	// Empty signature should have cardinality 0.
+	assert.Equal(t, 0, NewMinWise(h1, h2, 400).Cardinality())
+
+	assert.Equal(t, 11001, sigInts.Cardinality())
+	assert.Equal(t, 0, sigEvens.IntersectionCardinality(sigOdds))
+	assert.Equal(t, sigInts.Cardinality(), sigEvens.UnionCardinality(sigOdds))
+
+	log.Println("Cardinality of Ints:", sigInts.Cardinality())
+	log.Println("Cardinality of Evens:", sigEvens.Cardinality())
+	log.Println("Cardinality of Odds:", sigOdds.Cardinality())
+	log.Println("Cardinality of union:", sigEvens.UnionCardinality(sigOdds))
+	log.Println("Cardinality of Ints && Evens:", sigInts.IntersectionCardinality(sigEvens))
+	log.Println("Cardinality of Evens && Odds:", sigEvens.IntersectionCardinality(sigOdds))
+	log.Println("Cardinality of Ints - Evens:", sigInts.LessCardinality(sigEvens))
+
 }
 
 func TestIsEmpty(t *testing.T) {
