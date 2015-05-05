@@ -62,6 +62,10 @@ func NewMinWiseFromSignature(h1, h2 HashFunc, sig []uint64) *MinWise {
 
 // NOTE MinWise methods
 
+func (m *MinWise) Len() int {
+	return len(m.minimums)
+}
+
 // IsEmpty reports whether the MinWise instance represents a signature
 // of the empty set.  Note that it's possible for a signature of a
 // non-empty set to equal the signature for the empty set in rare

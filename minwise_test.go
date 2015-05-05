@@ -56,6 +56,11 @@ func newDummyMinWise(sig []uint64) *MinWise {
 	return m
 }
 
+func TestLen(t *testing.T) {
+	s := makeSigOfInts()
+	assert.Equal(t, 400, s.Len())
+}
+
 func TestCardinality(t *testing.T) {
 
 	sigInts := makeSigOfInts()   // I
