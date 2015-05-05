@@ -91,7 +91,8 @@ func (m *MinWise) PushBytes(b []byte) {
 	for i, min := range m.minimums {
 		// Compute hi(b) for ith hash function hi
 		hb := v1 + uint64(i)*v2
-		if hb < min {
+		// Ensure 0 is never pushed.
+		if 0 < hb && hb < min {
 			m.minimums[i] = hb
 		}
 	}

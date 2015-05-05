@@ -61,6 +61,15 @@ func TestLen(t *testing.T) {
 	assert.Equal(t, 400, s.Len())
 }
 
+func TestPush(t *testing.T) {
+	// Test that 0 values are never pushed.
+	h := func(bs []byte) uint64 { return 0 }
+	s := NewMinWise(h, h, 2)
+	s.Push(1)
+	assert.Equal(t, []uint64{infinity, infinity}, s.Signature())
+	assert.True(t, s.IsEmpty())
+}
+
 func TestCardinality(t *testing.T) {
 
 	sigInts := makeSigOfInts()   // I
