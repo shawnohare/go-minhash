@@ -130,7 +130,8 @@ func (m *MinWise) Merge(m2 MinHash) {
 	}
 }
 
-// Cardinality estimates the cardinality of the set.
+// Cardinality estimates the cardinality of the set. Both the
+// signature for the empty set and the zero signature have 0 cardinality.
 func (m *MinWise) Cardinality() int {
 
 	// http://www.cohenwang.com/edith/Papers/tcest.pdf
@@ -147,6 +148,8 @@ func (m *MinWise) Cardinality() int {
 	// Use inverse transform to obtain a sample from Z for each sig element.
 	for _, v := range m.minimums {
 
+		d := infinity - v
+		// Make sure the zero signature and sig for empty set return 0.
 		if d == 0 || d == infinity {
 			continue
 		}
