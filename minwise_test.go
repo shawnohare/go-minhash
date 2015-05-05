@@ -65,6 +65,9 @@ func TestCardinality(t *testing.T) {
 	// Empty signature should have cardinality 0.
 	assert.Equal(t, 0, NewMinWise(h1, h2, 400).Cardinality())
 
+	// Zero signature should also have cardinality 0.
+	assert.Equal(t, 0, NewMinWiseFromSignature(h1, h2, []uint64{0, 0, 0}).Cardinality())
+
 	assert.Equal(t, 11001, sigInts.Cardinality())
 	assert.Equal(t, 0, sigEvens.IntersectionCardinality(sigOdds))
 	assert.Equal(t, sigInts.Cardinality(), sigEvens.UnionCardinality(sigOdds))
@@ -77,6 +80,13 @@ func TestCardinality(t *testing.T) {
 	log.Println("Cardinality of Evens && Odds:", sigEvens.IntersectionCardinality(sigOdds))
 	log.Println("Cardinality of Ints - Evens:", sigInts.LessCardinality(sigEvens))
 
+}
+
+func TestCopy(t *testing.T) {
+	c := makeSigOfEvens().Copy()
+	odds := makeSigOfOdds()
+	c.Merge(odds)
+	log.Println("Cardinality of Evens Copy && Odds:", c.Cardinality())
 }
 
 func TestIsEmpty(t *testing.T) {

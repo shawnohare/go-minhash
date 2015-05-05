@@ -144,14 +144,15 @@ func (m *MinWise) Cardinality() int {
 	var cardinality int
 	sum := 0.0 // running sum
 
-	// Use inverse transform sampling to obtain a sample from Z
-	// for each signature element.
+	// Use inverse transform to obtain a sample from Z for each sig element.
 	for _, v := range m.minimums {
-		d := float64(infinity - v)
-		// d should only be 0 for the signature of the empty set.
-		if d > 0 {
-			sum += -math.Log(d / float64(infinity))
+
+		if d == 0 || d == infinity {
+			continue
 		}
+
+		d := float64(infinity - v)
+		sum += -math.Log(d / float64(infinity))
 	}
 
 	if sum != 0.0 {
