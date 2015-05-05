@@ -152,10 +152,10 @@ func (m *MinWise) Cardinality() int {
 		// Make sure the zero signature and sig for empty set return 0.
 		if d == 0 || d == infinity {
 			continue
+		} else {
+			sum += -math.Log(float64(d) / float64(infinity))
 		}
 
-		d := float64(infinity - v)
-		sum += -math.Log(d / float64(infinity))
 	}
 
 	if sum != 0.0 {
