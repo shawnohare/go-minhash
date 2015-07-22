@@ -1,6 +1,7 @@
 /*
 Package minhash provides probabilistic data structures for computing
-MinHash signatures for streaming data.
+MinHash signatures for streaming data from a min-wise independent
+parametric family of hash functions.
 
 The reader should also conf https://github.com/dgryski/go-minhash and
 https://github.com/tylertreat/BoomFilters.  In fact, most of the
@@ -50,7 +51,6 @@ For more information,
 
 This package works best when provided with a strong 64-bit hash function,
 such as CityHash, Spooky, Murmur3, or SipHash.
-
 */
 
 package minhash

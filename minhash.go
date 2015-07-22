@@ -1,8 +1,8 @@
 package minhash
 
-// MinHash is a data structure for generating a parametric family of
-// hash functions of the form h1 + i*h2 for i=1, ..., k to compute
-// a MinHash signature.  Each instance is tied to a single
+// MinHash is a data structure for generating a min-wise independent
+// parametric family of hash functions of the form h1 + i*h2 for i=1, ..., k
+// in order to to compute a MinHash signature.  Each instance is tied to a single
 // streamed set and hence single signature.  As the instance
 // ingests elements it keeps track of the minimum for the ith hash function.
 type MinHash struct {
