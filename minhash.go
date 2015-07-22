@@ -1,0 +1,131 @@
+package minhash
+
+// MinHash is a data structure for generating a parametric family of
+// hash functions of the form h1 + i*h2 for i=1, ..., k to compute
+// a MinHash signature.  Each instance is tied to a single
+// streamed set and hence single signature.  As the instance
+// ingests elements it keeps track of the minimum for the ith hash function.
+type MinHash struct {
+	mins []uint64 // mins[i] is the current min-value of ith hash func.
+	h1   HashFunc
+	h2   HashFunc
+}
+
+// Signature returns  the  current signature.
+func (m *MinHash) Signature() []uint64 {
+	return m.mins
+}
+
+// Merge combines the signatures of the second set,
+// creating the signature of their union.
+func (m *MinHash) Merge(m2 Interface) {
+
+	for i, v := range m2.Signature() {
+
+		if v < m.mins[i] {
+			m.mins[i] = v
+		}
+	}
+}
+
+// NewMinHash constructs a new instance and pushes the optional elements.
+func NewMinHash(h1, h2 HashFunc, size int) *MinHash {
+	mw := &MinHash{
+		mins: emptySetSignature(size), // running set of min values
+		h1:   h1,
+		h2:   h2,
+	}
+
+	return mw
+}
+
+func NewMinHashFromSignature(h1, h2 HashFunc, sig []uint64) *MinHash {
+	csig := make([]uint64, len(sig))
+	copy(csig, sig)
+	mw := MinHash{
+		mins: csig,
+		h1:   h1,
+		h2:   h2,
+	}
+	return &mw
+}
+
+// IsEmpty reports whether the MinHash instance represents a signature
+// of the empty set.  Note that it's possible for a signature of a
+// non-empty set to equal the signature for the empty set in rare
+// circumstances (e.g., when the hash family is not min-wise independent).
+func (m *MinHash) IsEmpty() bool {
+	return IsEmpty(m)
+}
+
+// Copy returns a new MinHash instance with the same type and data.
+func (m *MinHash) Copy() *MinHash {
+	return NewMinHashFromSignature(m.h1, m.h2, m.Signature())
+}
+
+// Push deals with generic data by handling byte conversion.
+// It first hashes the input with each function in the instance's family,
+// and then compares these values to the set of current mins,
+// updating them as necessary.
+func (m *MinHash) Push(x interface{}) {
+	m.PushBytes(toBytes(x))
+}
+
+// PushBytes updates the set's signature.  It hashes the input
+// with each function in the family and compares these values
+// with the current set of mins, replacing them as necessary.
+func (m *MinHash) PushBytes(b []byte) {
+
+	v1 := m.h1(b)
+	v2 := m.h2(b)
+
+	// Compare minimal values
+	for i, min := range m.mins {
+		// Compute hi(b) for ith hash function hi
+		hb := v1 + uint64(i)*v2
+		// Ensure 0 is never pushed.
+		if 0 < hb && hb < min {
+			m.mins[i] = hb
+		}
+	}
+}
+
+// PushStringInt first converts a string into a uint64 before pushing.
+func (m *MinHash) PushStringInt(s string) {
+	m.PushBytes(stringIntToBytes(s))
+}
+
+// Similarity computes the similarity of two signatures represented
+// as MinHash instances.  This estimates the Jaccard index of the
+// two underlying sets.
+func (m *MinHash) Similarity(m2 Interface) float64 {
+	return Similarity(m, m2)
+}
+
+// Cardinality estimates the cardinality of the set. Both the
+// signature for the empty set and the zero signature have 0 cardinality.
+func (m *MinHash) Cardinality() int {
+	return Cardinality(m)
+}
+
+// UnionCardinality estimates the cardinality of the union.
+func (m *MinHash) UnionCardinality(m2 Interface) int {
+	return UnionCardinality(m, m2)
+}
+
+// IntersectionCardinality estimates the cardinality of the intersection.
+func (m *MinHash) IntersectionCardinality(m2 Interface) int {
+	return IntersectionCardinality(m, m2)
+}
+
+// SymmetricDifferenceCardinality estimates the difference between
+// the cardinality of the union and intersection.
+func (m *MinHash) SymmetricDifferenceCardinality(m2 Interface) int {
+	return SymmetricDifferenceCardinality(m, m2)
+}
+
+// LessCardinality estimates the cardinality of the left set minus
+// the right set. This operator is not symmetric.
+func (m *MinHash) LessCardinality(m2 Interface) int {
+	return LessCardinality(m, m2)
+}
