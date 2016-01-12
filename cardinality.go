@@ -9,9 +9,18 @@ func UnionCardinality(m1, m2 Interface) int {
 // IntersectionCardinality estimates the cardinality of the intersection.
 func IntersectionCardinality(m1, m2 Interface) int {
 	// |A & B| + |A || B| = |A| +|B|
-	est := Cardinality(m1) + Cardinality(m2) - UnionCardinality(m1, m2)
+	c1 := Cardinality(m1)
+	c2 := Cardinality(m2)
+	u := UnionCardinality(m1, m2)
+	est := c1 + c2 - u
 	if est < 0 {
 		est = 0
+	}
+	if est > c1 {
+		est = c1
+	}
+	if est > c2 {
+		est = c2
 	}
 
 	return est
