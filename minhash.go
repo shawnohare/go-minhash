@@ -1,5 +1,7 @@
 package minhash
 
+import "errors"
+
 // MinHash is a data structure for generating a min-wise independent
 // parametric family of hash functions of the form h1 + i*h2 for i=1, ..., k
 // in order to to compute a MinHash signature.  Each instance is tied to a single
@@ -9,23 +11,6 @@ type MinHash struct {
 	mins []uint64 // mins[i] is the current min-value of ith hash func.
 	h1   HashFunc
 	h2   HashFunc
-}
-
-// Signature returns  the  current signature.
-func (m *MinHash) Signature() []uint64 {
-	return m.mins
-}
-
-// Merge combines the signatures of the second set,
-// creating the signature of their union.
-func (m *MinHash) Merge(m2 Interface) {
-
-	for i, v := range m2.Signature() {
-
-		if v < m.mins[i] {
-			m.mins[i] = v
-		}
-	}
 }
 
 // NewMinHash constructs a new instance and pushes the optional elements.
@@ -48,6 +33,27 @@ func NewMinHashFromSignature(h1, h2 HashFunc, sig []uint64) *MinHash {
 		h2:   h2,
 	}
 	return &mw
+}
+
+// Signature returns the underlying signature slice.
+func (m *MinHash) Signature() []uint64 {
+	return m.mins
+}
+
+// Merge combines the signatures of the second set,
+// creating the signature of their union.
+func (m *MinHash) Merge(m2 Interface) error {
+
+	if len(m.Signature()) != len(m2.Signature()) {
+		return errors.New("Cannot merge signatures due to size mismatch.")
+	}
+
+	for i, v := range m2.Signature() {
+		if v < m.mins[i] {
+			m.mins[i] = v
+		}
+	}
+	return nil
 }
 
 // IsEmpty reports whether the MinHash instance represents a signature
