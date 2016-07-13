@@ -35,7 +35,7 @@ func NewMinHash(h1, h2 HashFunc, size int) *MinHash {
 }
 
 // NewFromSignature creates a MinHash initialzed with the input signature.
-func NewhFromSignature(h1, h2 HashFunc, signature []uint64) *MinHash {
+func NewFromSignature(h1, h2 HashFunc, signature []uint64) *MinHash {
 	return &MinHash{
 		mins: signature,
 		h1:   h1,
