@@ -45,6 +45,20 @@ func NewMinHashFromSignature(h1, h2 HashFunc, sig []uint64) *MinHash {
 	return &mw
 }
 
+// SetHashes sets the two hash functions the MinHash uses to generate
+// a parametric family of hash functions from which the set signature is
+// derived.
+func (m *MinHash) SetHashes(h1 HashFunc, h2 HashFunc) {
+	m.h1, m.h2 = h1, h2
+}
+
+// SetSignature sets the instance's underlying signature.  This can change
+// the type of the MinHash if the input signature length differs from the
+// length of the instance's signature.
+func (m *MinHash) SetSignature(signature []uint64) {
+	m.mins = signature
+}
+
 // Signature returns the underlying signature slice.
 func (m *MinHash) Signature() []uint64 {
 	return m.mins
