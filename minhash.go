@@ -1,6 +1,11 @@
 package minhash
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/dgryski/go-farm"
+	"github.com/dgryski/go-spooky"
+)
 
 // MinHash is a data structure for generating a min-wise independent
 // parametric family of hash functions of the form h1 + i*h2 for i=1, ..., k
@@ -11,6 +16,11 @@ type MinHash struct {
 	mins []uint64 // mins[i] is the current min-value of ith hash func.
 	h1   HashFunc
 	h2   HashFunc
+}
+
+// New MinHash instance.  It is an alias for NewMinHash.
+func New(h1, h2 HashFunc, size int) *MinHash {
+	return NewMinHash(spooky.Hash64, farm.Hash64, size)
 }
 
 // NewMinHash constructs a new instance and pushes the optional elements.
