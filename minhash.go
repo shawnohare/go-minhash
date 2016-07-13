@@ -18,12 +18,12 @@ type MinHash struct {
 	h2   HashFunc
 }
 
-// New MinHash instance.  It is an alias for NewMinHash.
+// New constructs a new MinHash instance.
 func New(h1, h2 HashFunc, size int) *MinHash {
 	return NewMinHash(spooky.Hash64, farm.Hash64, size)
 }
 
-// NewMinHash constructs a new instance and pushes the optional elements.
+// NewMinHash is deprecated.  Use New instead.
 func NewMinHash(h1, h2 HashFunc, size int) *MinHash {
 	mw := &MinHash{
 		mins: emptySetSignature(size), // running set of min values
@@ -34,6 +34,16 @@ func NewMinHash(h1, h2 HashFunc, size int) *MinHash {
 	return mw
 }
 
+// NewFromSignature creates a MinHash initialzed with the input signature.
+func NewhFromSignature(h1, h2 HashFunc, signature []uint64) *MinHash {
+	return &MinHash{
+		mins: signature,
+		h1:   h1,
+		h2:   h2,
+	}
+}
+
+// NewMinHashFromSignature is deprecated.  Use NewFromSignature instead.
 func NewMinHashFromSignature(h1, h2 HashFunc, sig []uint64) *MinHash {
 	csig := make([]uint64, len(sig))
 	copy(csig, sig)
