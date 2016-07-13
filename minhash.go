@@ -111,6 +111,11 @@ func (m *MinHash) PushStringInt(s string) {
 	m.PushBytes(stringIntToBytes(s))
 }
 
+// PushString casts the input as a []byte and pushes the element.
+func (m *MinHash) PushString(s string) {
+	m.PushBytes([]byte(s))
+}
+
 // Similarity computes the similarity of two signatures represented
 // as MinHash instances.  This estimates the Jaccard index of the
 // two underlying sets.
